@@ -197,13 +197,7 @@ struct AnalogClockView: View {
                     length: center * 0.7,
                     width: 3,
                     angle: $minuteAngle,
-                    size: size,
-                    onAngleChange: { minuteAngle in
-                        // SNAP hour hand based on minute hand
-                        let hourBase = floor(hourAngle / 30) * 30
-                        let minuteProgress = (minuteAngle / 360) * 30
-                        hourAngle = hourBase + minuteProgress
-                    }
+                    size: size
                 )
 
                 Circle()
@@ -230,7 +224,6 @@ struct ClockHand: View {
     let width: CGFloat
     @Binding var angle: Double
     let size: CGFloat
-    var onAngleChange: ((Double) -> Void)? = nil
 
     var body: some View {
         Rectangle()
@@ -241,9 +234,7 @@ struct ClockHand: View {
             .gesture(
                 DragGesture()
                     .onChanged { value in
-                        let newAngle = angleFromDrag(value.location)
-                        angle = newAngle
-                        onAngleChange?(newAngle)
+                        angle = angleFromDrag(value.location)
                     }
             )
     }
@@ -255,7 +246,6 @@ struct ClockHand: View {
         let degrees = radians * 180 / .pi + 90
         return degrees < 0 ? degrees + 360 : degrees
     }
-
 }
 
 #Preview {
