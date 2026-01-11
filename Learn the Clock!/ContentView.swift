@@ -75,7 +75,7 @@ struct ClockGridView: View {
     let tasks: [ClockTask]
 
     private var columnSpacing: CGFloat {
-        UIDevice.current.userInterfaceIdiom == .pad ? 32 : 20
+        UIDevice.current.userInterfaceIdiom == .pad ? 16 : 4
     }
 
     private var columns: [GridItem] {
@@ -126,13 +126,26 @@ struct ClockTaskView: View {
 
     private func check() {
         let components = Calendar.current.dateComponents([.hour, .minute], from: task.date)
-        let targetHour = components.hour! % 12
+        let targetHour24 = components.hour!
         let targetMinute = components.minute!
 
-        let hourFromAngle = Int((hourAngle / 30).rounded()) % 12
-        let minuteFromAngle = Int((minuteAngle / 6).rounded()) % 60
+        // REAL hour angle includes minutes (e.g. 3:55 is almost 4)
+        let targetHourAngle = (Double(targetHour24 % 12) * 30)
+            + (Double(targetMinute) / 60.0 * 30.0)
 
-        isCorrect = hourFromAngle == targetHour && minuteFromAngle == targetMinute
+        let targetMinuteAngle = Double(targetMinute) * 6
+
+        let hourDiff = angularDifference(hourAngle, targetHourAngle)
+        let minuteDiff = angularDifference(minuteAngle, targetMinuteAngle)
+
+        // tolerances in degrees (kid‑friendly)
+        // stricter tolerances in degrees (3x smaller)
+        isCorrect = hourDiff < (10.0 / 3.0) && minuteDiff < (5.0 / 3.0)
+    }
+
+    private func angularDifference(_ a: Double, _ b: Double) -> Double {
+        let diff = abs(a - b).truncatingRemainder(dividingBy: 360)
+        return min(diff, 360 - diff)
     }
 
     private func formatted(time: Date) -> String {
@@ -174,8 +187,24 @@ struct AnalogClockView: View {
                         .position(position(for: Double(number) * 30, size: size))
                 }
 
-                ClockHand(length: center * 0.45, width: 5, angle: $hourAngle, size: size)
-                ClockHand(length: center * 0.7, width: 3, angle: $minuteAngle, size: size)
+                ClockHand(
+                    length: center * 0.45,
+                    width: 5,
+                    angle: $hourAngle,
+                    size: size
+                )
+                ClockHand(
+                    length: center * 0.7,
+                    width: 3,
+                    angle: $minuteAngle,
+                    size: size,
+                    onAngleChange: { minuteAngle in
+                        // SNAP hour hand based on minute hand
+                        let hourBase = floor(hourAngle / 30) * 30
+                        let minuteProgress = (minuteAngle / 360) * 30
+                        hourAngle = hourBase + minuteProgress
+                    }
+                )
 
                 Circle()
                     .fill(Color.primary)
@@ -201,6 +230,7 @@ struct ClockHand: View {
     let width: CGFloat
     @Binding var angle: Double
     let size: CGFloat
+    var onAngleChange: ((Double) -> Void)? = nil
 
     var body: some View {
         Rectangle()
@@ -211,7 +241,9 @@ struct ClockHand: View {
             .gesture(
                 DragGesture()
                     .onChanged { value in
-                        angle = angleFromDrag(value.location)
+                        let newAngle = angleFromDrag(value.location)
+                        angle = newAngle
+                        onAngleChange?(newAngle)
                     }
             )
     }
@@ -223,6 +255,7 @@ struct ClockHand: View {
         let degrees = radians * 180 / .pi + 90
         return degrees < 0 ? degrees + 360 : degrees
     }
+
 }
 
 #Preview {
