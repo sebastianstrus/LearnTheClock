@@ -156,6 +156,7 @@ struct ClockTaskView: View {
 }
 
 // MARK: - Analog Clock
+// MARK: - Analog Clock (z poprawnym przekazaniem środka)
 struct AnalogClockView: View {
     @Binding var hourAngle: Double
     @Binding var minuteAngle: Double
@@ -191,19 +192,21 @@ struct AnalogClockView: View {
                     length: center * 0.45,
                     width: 5,
                     angle: $hourAngle,
-                    size: size
+                    centerPoint: CGPoint(x: geo.size.width / 2, y: geo.size.height / 2)
                 )
                 ClockHand(
                     length: center * 0.7,
                     width: 3,
                     angle: $minuteAngle,
-                    size: size
+                    centerPoint: CGPoint(x: geo.size.width / 2, y: geo.size.height / 2)
                 )
 
                 Circle()
                     .fill(Color.primary)
                     .frame(width: 8, height: 8)
             }
+            .frame(width: size, height: size)
+            .position(x: geo.size.width / 2, y: geo.size.height / 2)
         }
     }
 
@@ -218,12 +221,15 @@ struct AnalogClockView: View {
     }
 }
 
-// MARK: - Clock Hand
+// MARK: - Clock Hand (z poprawnym środkiem)
 struct ClockHand: View {
     let length: CGFloat
     let width: CGFloat
     @Binding var angle: Double
-    let size: CGFloat
+    let centerPoint: CGPoint
+
+    @State private var lastDragAngle: Double?
+    @State private var accumulatedAngle: Double = 0
 
     var body: some View {
         Rectangle()
@@ -232,21 +238,57 @@ struct ClockHand: View {
             .offset(y: -length / 2)
             .rotationEffect(.degrees(angle))
             .gesture(
-                DragGesture()
+                DragGesture(minimumDistance: 0)
                     .onChanged { value in
-                        angle = angleFromDrag(value.location)
+                        let currentDragAngle = angleFromDrag(value.location)
+                        
+                        if lastDragAngle == nil {
+                            // Pierwszy dotyk - ustaw wskazówkę na pozycję palca
+                            accumulatedAngle = currentDragAngle
+                            angle = currentDragAngle
+                            lastDragAngle = currentDragAngle
+                        } else {
+                            // Oblicz jak bardzo palec się obrócił
+                            let delta = shortestAngularDistance(from: lastDragAngle!, to: currentDragAngle)
+                            // Obróć wskazówkę o tyle samo
+                            accumulatedAngle += delta
+                            angle = normalize(accumulatedAngle)
+                            lastDragAngle = currentDragAngle
+                        }
+                    }
+                    .onEnded { _ in
+                        lastDragAngle = nil
                     }
             )
     }
 
     private func angleFromDrag(_ location: CGPoint) -> Double {
-        let center = CGPoint(x: size / 2, y: size / 2)
-        let vector = CGVector(dx: location.x - center.x, dy: location.y - center.y)
+        // Użyj RZECZYWISTEGO środka zegara, nie GeometryReader!
+        let vector = CGVector(dx: location.x - centerPoint.x, dy: location.y - centerPoint.y)
         let radians = atan2(vector.dy, vector.dx)
         let degrees = radians * 180 / .pi + 90
         return degrees < 0 ? degrees + 360 : degrees
     }
+
+    private func normalize(_ angle: Double) -> Double {
+        let value = angle.truncatingRemainder(dividingBy: 360)
+        return value < 0 ? value + 360 : value
+    }
+    
+    private func shortestAngularDistance(from: Double, to: Double) -> Double {
+        var delta = to - from
+        
+        while delta > 180 {
+            delta -= 360
+        }
+        while delta < -180 {
+            delta += 360
+        }
+        
+        return delta
+    }
 }
+
 
 #Preview {
     ContentView()
