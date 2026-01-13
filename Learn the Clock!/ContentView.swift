@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import AVFoundation
 
 // MARK: - Models
 struct ClockTask: Identifiable {
@@ -29,29 +30,75 @@ struct StartView: View {
     @State private var navigate = false
 
     var body: some View {
-        VStack(spacing: 24) {
-            Text("Nauka zegara")
-                .font(.largeTitle)
-                .bold()
+        ZStack {
+            LinearGradient(
+                colors: [Color.blue.opacity(0.2), Color.purple.opacity(0.2)],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            .ignoresSafeArea()
+            
+            VStack(spacing: 32) {
+                VStack(spacing: 12) {
+                    Text("🕐")
+                        .font(.system(size: 60))
+                    
+                    Text("Nauka Zegara")
+                        .font(.system(size: 36, weight: .bold, design: .rounded))
+                        .foregroundStyle(
+                            LinearGradient(
+                                colors: [.blue, .purple],
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
+                        )
+                }
+                
+                VStack(spacing: 16) {
+                    Text("Ile zegarków chcesz?")
+                        .font(.system(size: 20, weight: .semibold, design: .rounded))
+                        .foregroundColor(.secondary)
+                    
+                    TextField("10", text: $countText)
+                        .keyboardType(.numberPad)
+                        .font(.system(size: 28, weight: .bold, design: .rounded))
+                        .multilineTextAlignment(.center)
+                        .frame(width: 120, height: 60)
+                        .background(Color.white)
+                        .cornerRadius(16)
+                        .shadow(color: .black.opacity(0.1), radius: 8, y: 4)
+                }
+                
+                Button(action: {
+                    generateTasks()
+                    navigate = true
+                }) {
+                    HStack(spacing: 12) {
+                        Text("Start")
+                            .font(.system(size: 28, weight: .bold, design: .rounded))
+                        Image(systemName: "arrow.right.circle.fill")
+                            .font(.system(size: 28))
+                    }
+                    .foregroundColor(.white)
+                    .frame(width: 200, height: 70)
+                    .background(
+                        LinearGradient(
+                            colors: [.blue, .purple],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
+                    )
+                    .cornerRadius(20)
+                    .shadow(color: .blue.opacity(0.4), radius: 12, y: 6)
+                }
 
-            TextField("Liczba przykładów (np. 10)", text: $countText)
-                .keyboardType(.numberPad)
-                .textFieldStyle(.roundedBorder)
-                .frame(maxWidth: 200)
-
-            Button("Start") {
-                generateTasks()
-                navigate = true
+                NavigationLink(
+                    destination: ClockGridView(tasks: tasks),
+                    isActive: $navigate
+                ) { EmptyView() }
             }
-            .font(.title2)
-            .buttonStyle(.borderedProminent)
-
-            NavigationLink(
-                destination: ClockGridView(tasks: tasks),
-                isActive: $navigate
-            ) { EmptyView() }
+            .padding()
         }
-        .padding()
     }
 
     private func generateTasks() {
@@ -87,15 +134,25 @@ struct ClockGridView: View {
     }
 
     var body: some View {
-        ScrollView {
-            LazyVGrid(columns: columns, spacing: 40) {
-                ForEach(tasks) { task in
-                    ClockTaskView(task: task)
+        ZStack {
+            LinearGradient(
+                colors: [Color.blue.opacity(0.1), Color.purple.opacity(0.1)],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            .ignoresSafeArea()
+            
+            ScrollView {
+                LazyVGrid(columns: columns, spacing: 40) {
+                    ForEach(tasks) { task in
+                        ClockTaskView(task: task)
+                    }
                 }
+                .padding()
             }
-            .padding()
         }
-        .navigationTitle("Ustaw poprawny czas")
+        .navigationTitle("Ustaw poprawny czas ⏰")
+        .navigationBarTitleDisplayMode(.inline)
     }
 }
 
@@ -106,25 +163,67 @@ struct ClockTaskView: View {
     @State private var hourAngle: Double = 0
     @State private var minuteAngle: Double = 0
     @State private var isCorrect = false
+    @State private var audioPlayer: AVAudioPlayer?
 
     var body: some View {
-        VStack(spacing: 8) {
+        VStack(spacing: 12) {
             Text(formatted(time: task.date))
-                .font(.headline)
+                .font(.system(size: 24, weight: .bold, design: .rounded))
+                .foregroundStyle(
+                    LinearGradient(
+                        colors: [.blue, .purple],
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    )
+                )
+                .padding(.horizontal, 20)
+                .padding(.vertical, 8)
+                .background(Color.white)
+                .cornerRadius(12)
+                .shadow(color: .black.opacity(0.1), radius: 4, y: 2)
 
             AnalogClockView(
                 hourAngle: $hourAngle,
                 minuteAngle: $minuteAngle,
-                isCorrect: isCorrect
+                isCorrect: isCorrect,
+                isLocked: isCorrect
             )
             .frame(maxWidth: .infinity)
             .aspectRatio(1, contentMode: .fit)
+            
+            if isCorrect {
+                HStack(spacing: 8) {
+                    Image(systemName: "checkmark.circle.fill")
+                        .font(.system(size: 24))
+                    Text("Świetnie!")
+                        .font(.system(size: 20, weight: .bold, design: .rounded))
+                }
+                .foregroundColor(.green)
+                .transition(.scale.combined(with: .opacity))
+            }
         }
-        .onChange(of: hourAngle) { _ in check() }
-        .onChange(of: minuteAngle) { _ in check() }
+        .padding(16)
+        .background(Color.white)
+        .cornerRadius(20)
+        .shadow(color: isCorrect ? .green.opacity(0.3) : .black.opacity(0.1), radius: 12, y: 6)
+        .onChange(of: hourAngle) { _ in
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                check()
+            }
+        }
+        .onChange(of: minuteAngle) { _ in
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                check()
+            }
+        }
     }
 
     private func check() {
+        // Jeśli już poprawnie ustawione, nie sprawdzaj ponownie
+        if isCorrect {
+            return
+        }
+        
         let components = Calendar.current.dateComponents([.hour, .minute], from: task.date)
         let targetHour24 = components.hour!
         let targetMinute = components.minute!
@@ -137,7 +236,13 @@ struct ClockTaskView: View {
         let hourDiff = angularDifference(hourAngle, targetHourAngle)
         let minuteDiff = angularDifference(minuteAngle, targetMinuteAngle)
 
+        let wasCorrect = isCorrect
         isCorrect = hourDiff < (10.0 / 3.0) && minuteDiff < (5.0 / 3.0)
+        
+        // Odtwórz dźwięk gdy po raz pierwszy ustawiono poprawnie
+        if isCorrect && !wasCorrect {
+            playSuccessSound()
+        }
     }
 
     private func angularDifference(_ a: Double, _ b: Double) -> Double {
@@ -150,6 +255,20 @@ struct ClockTaskView: View {
         formatter.dateFormat = "HH:mm"
         return formatter.string(from: time)
     }
+    
+    private func playSuccessSound() {
+        guard let soundURL = Bundle.main.url(forResource: "stars", withExtension: "m4a") else {
+            print("Nie znaleziono pliku stars.m4a")
+            return
+        }
+        
+        do {
+            audioPlayer = try AVAudioPlayer(contentsOf: soundURL)
+            audioPlayer?.play()
+        } catch {
+            print("Błąd odtwarzania dźwięku: \(error)")
+        }
+    }
 }
 
 // MARK: - Analog Clock
@@ -157,58 +276,106 @@ struct AnalogClockView: View {
     @Binding var hourAngle: Double
     @Binding var minuteAngle: Double
     var isCorrect: Bool
-
+    var isLocked: Bool
+    
     @State private var draggingHand: DraggingHand? = nil
-
+    
     enum DraggingHand {
         case hour, minute
     }
 
     var body: some View {
         GeometryReader { geo in
-            let width = geo.size.width
-            let height = geo.size.height
-            let size = min(width, height)
+            let size = min(geo.size.width, geo.size.height)
             let center = size / 2
 
             ZStack {
-                // Face
+                // Zewnętrzny gradient ring
                 Circle()
-                    .stroke(isCorrect ? Color.green : Color.primary, lineWidth: 5)
+                    .stroke(
+                        LinearGradient(
+                            colors: isCorrect ? [.green, .green.opacity(0.6)] : [.blue.opacity(0.3), .purple.opacity(0.3)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
+                        lineWidth: 8
+                    )
+                    .shadow(color: isCorrect ? .green.opacity(0.3) : .blue.opacity(0.2), radius: 8, y: 4)
+                
+                // Białe tło
+                Circle()
+                    .fill(Color.white)
+                    .padding(8)
+                    .shadow(color: .black.opacity(0.1), radius: 4, y: 2)
 
-                // Ticks
-                TicksView(center: center)
+                // Kolorowe znaczniki dla ważnych godzin
+                ForEach(1...12, id: \.self) { hour in
+                    Circle()
+                        .fill(hourColor(for: hour))
+                        .frame(width: 8, height: 8)
+                        .offset(y: -center + 20)
+                        .rotationEffect(.degrees(Double(hour) * 30))
+                }
+                
+                // Cienkie kreski co minutę
+                ForEach(0..<60) { tick in
+                    if tick % 5 != 0 {
+                        Rectangle()
+                            .fill(Color.gray.opacity(0.3))
+                            .frame(width: 1, height: 4)
+                            .offset(y: -center + 14)
+                            .rotationEffect(.degrees(Double(tick) * 6))
+                    }
+                }
 
-                // Numbers
-                NumbersView(size: size)
+                // Cyfry
+                ForEach(1...12, id: \.self) { number in
+                    Text("\(number)")
+                        .font(.system(size: size * 0.08, weight: .bold, design: .rounded))
+                        .foregroundColor(hourColor(for: number))
+                        .position(position(for: Double(number) * 30, size: size))
+                }
 
-                // Hour hand
-                ClockHand(
+                // Wskazówka godzinowa - krótka i gruba
+                FancyClockHand(
                     length: center * 0.45,
-                    width: 5,
+                    width: 10,
                     angle: hourAngle,
-                    color: draggingHand == .hour ? .blue : .primary
+                    color: draggingHand == .hour ? .orange : .blue,
+                    isDragging: draggingHand == .hour
                 )
-
-                // Minute hand
-                ClockHand(
+                
+                // Wskazówka minutowa - długa i cienka
+                FancyClockHand(
                     length: center * 0.7,
-                    width: 3,
+                    width: 6,
                     angle: minuteAngle,
-                    color: draggingHand == .minute ? .red : .primary
+                    color: draggingHand == .minute ? .orange : .red,
+                    isDragging: draggingHand == .minute
                 )
 
-                // Pin
-                Circle()
-                    .fill(Color.primary)
-                    .frame(width: 8, height: 8)
+                // Środkowy punkt
+                ZStack {
+                    Circle()
+                        .fill(Color.yellow)
+                        .frame(width: 20, height: 20)
+                        .shadow(color: .orange.opacity(0.5), radius: 4, y: 2)
+                    
+                    Circle()
+                        .fill(Color.white)
+                        .frame(width: 8, height: 8)
+                }
             }
-            .contentShape(Rectangle())
             .gesture(
                 DragGesture()
                     .onChanged { value in
+                        // Jeśli zegar zablokowany, ignoruj gesty
+                        if isLocked {
+                            return
+                        }
+                        
                         let centerPoint = CGPoint(x: size / 2, y: size / 2)
-
+                        
                         if draggingHand == nil {
                             draggingHand = determineClosestHand(
                                 touchPoint: value.startLocation,
@@ -219,16 +386,13 @@ struct AnalogClockView: View {
                                 minuteLength: center * 0.7
                             )
                         }
-
+                        
                         let newAngle = angleFromPoint(value.location, center: centerPoint)
-
-                        switch draggingHand {
-                        case .hour:
+                        
+                        if draggingHand == .hour {
                             hourAngle = newAngle
-                        case .minute:
+                        } else if draggingHand == .minute {
                             minuteAngle = newAngle
-                        case .none:
-                            break
                         }
                     }
                     .onEnded { _ in
@@ -237,9 +401,14 @@ struct AnalogClockView: View {
             )
         }
     }
+    
+    private func hourColor(for hour: Int) -> Color {
+        let colors: [Color] = [.red, .orange, .yellow, .green, .blue, .purple]
+        return colors[(hour - 1) % colors.count]
+    }
 
     private func position(for angle: Double, size: CGFloat) -> CGPoint {
-        let radius = size * 0.42
+        let radius = size * 0.38
         let radians = (angle - 90) * .pi / 180
 
         return CGPoint(
@@ -247,14 +416,14 @@ struct AnalogClockView: View {
             y: size / 2 + radius * CGFloat(Foundation.sin(radians))
         )
     }
-
+    
     private func angleFromPoint(_ point: CGPoint, center: CGPoint) -> Double {
         let vector = CGVector(dx: point.x - center.x, dy: point.y - center.y)
         let radians = atan2(vector.dy, vector.dx)
         let degrees = radians * 180 / .pi + 90
         return degrees < 0 ? degrees + 360 : degrees
     }
-
+    
     private func determineClosestHand(
         touchPoint: CGPoint,
         center: CGPoint,
@@ -265,13 +434,13 @@ struct AnalogClockView: View {
     ) -> DraggingHand {
         let hourTip = tipPosition(angle: hourAngle, length: hourLength, center: center)
         let distanceToHour = distance(from: touchPoint, to: hourTip)
-
+        
         let minuteTip = tipPosition(angle: minuteAngle, length: minuteLength, center: center)
         let distanceToMinute = distance(from: touchPoint, to: minuteTip)
-
+        
         return distanceToHour < distanceToMinute ? .hour : .minute
     }
-
+    
     private func tipPosition(angle: Double, length: CGFloat, center: CGPoint) -> CGPoint {
         let radians = (angle - 90) * .pi / 180
         return CGPoint(
@@ -279,7 +448,7 @@ struct AnalogClockView: View {
             y: center.y + length * CGFloat(sin(radians))
         )
     }
-
+    
     private func distance(from p1: CGPoint, to p2: CGPoint) -> CGFloat {
         let dx = p1.x - p2.x
         let dy = p1.y - p2.y
@@ -287,61 +456,58 @@ struct AnalogClockView: View {
     }
 }
 
-// Extracted subviews to reduce type-checking complexity
-private struct TicksView: View {
-    let center: CGFloat
-
-    var body: some View {
-        ZStack {
-            ForEach(0..<60) { tick in
-                Rectangle()
-                    .fill(Color.primary)
-                    .frame(width: tick % 5 == 0 ? 3 : 1,
-                           height: tick % 5 == 0 ? 10 : 5)
-                    .offset(y: -center + 8)
-                    .rotationEffect(.degrees(Double(tick) * 6))
-            }
-        }
-    }
-}
-
-private struct NumbersView: View {
-    let size: CGFloat
-
-    var body: some View {
-        ZStack {
-            ForEach(1...12, id: \.self) { number in
-                Text("\(number)")
-                    .font(.caption)
-                    .position(position(for: Double(number) * 30, size: size))
-            }
-        }
-    }
-
-    private func position(for angle: Double, size: CGFloat) -> CGPoint {
-        let radius = size * 0.42
-        let radians = (angle - 90) * .pi / 180
-
-        return CGPoint(
-            x: size / 2 + radius * CGFloat(Foundation.cos(radians)),
-            y: size / 2 + radius * CGFloat(Foundation.sin(radians))
-        )
-    }
-}
-
-// MARK: - Clock Hand (prosty view bez gestów)
-struct ClockHand: View {
+// MARK: - Fancy Clock Hand
+struct FancyClockHand: View {
     let length: CGFloat
     let width: CGFloat
     let angle: Double
     let color: Color
+    let isDragging: Bool
 
     var body: some View {
-        Rectangle()
-            .fill(color)
-            .frame(width: width, height: length)
-            .offset(y: -length / 2)
-            .rotationEffect(.degrees(angle))
+        ZStack {
+            // Cień wskazówki
+            RoundedRectangle(cornerRadius: width / 2)
+                .fill(color.opacity(0.3))
+                .frame(width: width + 2, height: length)
+                .offset(y: -length / 2)
+                .blur(radius: 3)
+            
+            // Główna wskazówka
+            RoundedRectangle(cornerRadius: width / 2)
+                .fill(
+                    LinearGradient(
+                        colors: [color, color.opacity(0.7)],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                )
+                .frame(width: width, height: length)
+                .offset(y: -length / 2)
+                .shadow(color: color.opacity(0.5), radius: isDragging ? 8 : 4, y: 2)
+            
+            // Strzałka na końcu
+            Triangle()
+                .fill(color)
+                .frame(width: width * 2, height: width * 2)
+                .offset(y: -length + width)
+                .shadow(color: color.opacity(0.5), radius: isDragging ? 6 : 3, y: 1)
+        }
+        .rotationEffect(.degrees(angle))
+        .scaleEffect(isDragging ? 1.1 : 1.0)
+        .animation(.spring(response: 0.3, dampingFraction: 0.6), value: isDragging)
+    }
+}
+
+// MARK: - Triangle Shape
+struct Triangle: Shape {
+    func path(in rect: CGRect) -> Path {
+        var path = Path()
+        path.move(to: CGPoint(x: rect.midX, y: rect.minY))
+        path.addLine(to: CGPoint(x: rect.minX, y: rect.maxY))
+        path.addLine(to: CGPoint(x: rect.maxX, y: rect.maxY))
+        path.closeSubpath()
+        return path
     }
 }
 
