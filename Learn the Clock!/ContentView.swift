@@ -14,113 +14,19 @@ struct ClockTask: Identifiable {
     let date: Date
 }
 
-// MARK: - App Entry
-struct ContentView: View {
-    var body: some View {
-        NavigationStack {
-            StartView()
-        }
-    }
-}
 
-// MARK: - Start View
-struct StartView: View {
-    @State private var countText: String = "10"
-    @State private var tasks: [ClockTask] = []
-    @State private var navigate = false
-
-    var body: some View {
-        ZStack {
-            LinearGradient(
-                colors: [Color.blue.opacity(0.2), Color.purple.opacity(0.2)],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-            .ignoresSafeArea()
-            
-            VStack(spacing: 32) {
-                VStack(spacing: 12) {
-                    Text("🕐")
-                        .font(.system(size: 60))
-                    
-                    Text("Nauka Zegara")
-                        .font(.system(size: 36, weight: .bold, design: .rounded))
-                        .foregroundStyle(
-                            LinearGradient(
-                                colors: [.blue, .purple],
-                                startPoint: .leading,
-                                endPoint: .trailing
-                            )
-                        )
-                }
-                
-                VStack(spacing: 16) {
-                    Text("Ile zegarków chcesz?")
-                        .font(.system(size: 20, weight: .semibold, design: .rounded))
-                        .foregroundColor(.secondary)
-                    
-                    TextField("10", text: $countText)
-                        .keyboardType(.numberPad)
-                        .font(.system(size: 28, weight: .bold, design: .rounded))
-                        .multilineTextAlignment(.center)
-                        .frame(width: 120, height: 60)
-                        .background(Color.white)
-                        .cornerRadius(16)
-                        .shadow(color: .black.opacity(0.1), radius: 8, y: 4)
-                }
-                
-                Button(action: {
-                    generateTasks()
-                    navigate = true
-                }) {
-                    HStack(spacing: 12) {
-                        Text("Start")
-                            .font(.system(size: 28, weight: .bold, design: .rounded))
-                        Image(systemName: "arrow.right.circle.fill")
-                            .font(.system(size: 28))
-                    }
-                    .foregroundColor(.white)
-                    .frame(width: 200, height: 70)
-                    .background(
-                        LinearGradient(
-                            colors: [.blue, .purple],
-                            startPoint: .leading,
-                            endPoint: .trailing
-                        )
-                    )
-                    .cornerRadius(20)
-                    .shadow(color: .blue.opacity(0.4), radius: 12, y: 6)
-                }
-
-                NavigationLink(
-                    destination: ClockGridView(tasks: tasks),
-                    isActive: $navigate
-                ) { EmptyView() }
-            }
-            .padding()
-        }
-    }
-
-    private func generateTasks() {
-        let count = min(max(Int(countText) ?? 1, 1), 30)
-
-        tasks = (0..<count).map { _ in
-            let hour = Int.random(in: 0...23)
-            let minute = Int.random(in: 0...11) * 5
-
-            var components = DateComponents()
-            components.hour = hour
-            components.minute = minute
-
-            return ClockTask(date: Calendar.current.date(from: components)!)
-        }
-    }
-}
 
 // MARK: - Grid View
 struct ClockGridView: View {
-    let tasks: [ClockTask]
-
+    
+    @StateObject private var viewModel: ClockGameViewModel
+    
+    init(settings: SettingsManager) {
+        _viewModel = StateObject(
+            wrappedValue: ClockGameViewModel(settings: settings)
+        )
+    }
+    
     private var columnSpacing: CGFloat {
         UIDevice.current.userInterfaceIdiom == .pad ? 16 : 4
     }
@@ -144,7 +50,7 @@ struct ClockGridView: View {
             
             ScrollView {
                 LazyVGrid(columns: columns, spacing: 40) {
-                    ForEach(tasks) { task in
+                    ForEach(viewModel.tasks) { task in
                         ClockTaskView(task: task)
                     }
                 }
@@ -153,6 +59,9 @@ struct ClockGridView: View {
         }
         .navigationTitle("Ustaw poprawny czas ⏰")
         .navigationBarTitleDisplayMode(.inline)
+        .onAppear {
+            viewModel.resetGame()
+        }
     }
 }
 
@@ -511,6 +420,3 @@ struct Triangle: Shape {
     }
 }
 
-#Preview {
-    ContentView()
-}

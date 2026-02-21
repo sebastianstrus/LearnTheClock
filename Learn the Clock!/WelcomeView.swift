@@ -65,8 +65,9 @@ struct WelcomeView: View {
                 Spacer()
                 
                 Group {
-                        NavigationLink(destination: StartView()
-                            .environmentObject(settings)) {
+                        NavigationLink(destination: ClockGridView(settings: settings)
+                            //.environmentObject(settings)
+                        ) {
                             Text("Start")
                                 .font(.system(size: 20, weight: .bold, design: .rounded))
                                 .foregroundColor(.white)
