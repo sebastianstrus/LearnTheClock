@@ -7,19 +7,19 @@
 	objects = {
 
 /* Begin PBXFileReference section */
-		7D44FE162F11BFBB00F3F038 /* Learn the Clock!.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Learn the Clock!.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		7D22E4922F47C14A005209EA /* Learn The Clock!.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Learn The Clock!.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		7D44FE182F11BFBB00F3F038 /* Learn the Clock! */ = {
+		7D22E4942F47C14A005209EA /* Learn The Clock! */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = "Learn the Clock!";
+			path = "Learn The Clock!";
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		7D44FE132F11BFBB00F3F038 /* Frameworks */ = {
+		7D22E48F2F47C14A005209EA /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -29,18 +29,18 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		7D44FE0D2F11BFBB00F3F038 = {
+		7D22E4892F47C14A005209EA = {
 			isa = PBXGroup;
 			children = (
-				7D44FE182F11BFBB00F3F038 /* Learn the Clock! */,
-				7D44FE172F11BFBB00F3F038 /* Products */,
+				7D22E4942F47C14A005209EA /* Learn The Clock! */,
+				7D22E4932F47C14A005209EA /* Products */,
 			);
 			sourceTree = "<group>";
 		};
-		7D44FE172F11BFBB00F3F038 /* Products */ = {
+		7D22E4932F47C14A005209EA /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				7D44FE162F11BFBB00F3F038 /* Learn the Clock!.app */,
+				7D22E4922F47C14A005209EA /* Learn The Clock!.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -48,64 +48,64 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		7D44FE152F11BFBB00F3F038 /* Learn the Clock! */ = {
+		7D22E4912F47C14A005209EA /* Learn The Clock! */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 7D44FE212F11BFBD00F3F038 /* Build configuration list for PBXNativeTarget "Learn the Clock!" */;
+			buildConfigurationList = 7D22E49D2F47C14C005209EA /* Build configuration list for PBXNativeTarget "Learn The Clock!" */;
 			buildPhases = (
-				7D44FE122F11BFBB00F3F038 /* Sources */,
-				7D44FE132F11BFBB00F3F038 /* Frameworks */,
-				7D44FE142F11BFBB00F3F038 /* Resources */,
+				7D22E48E2F47C14A005209EA /* Sources */,
+				7D22E48F2F47C14A005209EA /* Frameworks */,
+				7D22E4902F47C14A005209EA /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				7D44FE182F11BFBB00F3F038 /* Learn the Clock! */,
+				7D22E4942F47C14A005209EA /* Learn The Clock! */,
 			);
-			name = "Learn the Clock!";
+			name = "Learn The Clock!";
 			packageProductDependencies = (
 			);
-			productName = "Learn the Clock!";
-			productReference = 7D44FE162F11BFBB00F3F038 /* Learn the Clock!.app */;
+			productName = "Learn The Clock!";
+			productReference = 7D22E4922F47C14A005209EA /* Learn The Clock!.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
-		7D44FE0E2F11BFBB00F3F038 /* Project object */ = {
+		7D22E48A2F47C14A005209EA /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 2600;
-				LastUpgradeCheck = 2600;
+				LastSwiftUpdateCheck = 2630;
+				LastUpgradeCheck = 2630;
 				TargetAttributes = {
-					7D44FE152F11BFBB00F3F038 = {
-						CreatedOnToolsVersion = 26.0;
+					7D22E4912F47C14A005209EA = {
+						CreatedOnToolsVersion = 26.3;
 					};
 				};
 			};
-			buildConfigurationList = 7D44FE112F11BFBB00F3F038 /* Build configuration list for PBXProject "Learn the Clock!" */;
+			buildConfigurationList = 7D22E48D2F47C14A005209EA /* Build configuration list for PBXProject "Learn The Clock!" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
 				Base,
 			);
-			mainGroup = 7D44FE0D2F11BFBB00F3F038;
+			mainGroup = 7D22E4892F47C14A005209EA;
 			minimizedProjectReferenceProxies = 1;
 			preferredProjectObjectVersion = 77;
-			productRefGroup = 7D44FE172F11BFBB00F3F038 /* Products */;
+			productRefGroup = 7D22E4932F47C14A005209EA /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				7D44FE152F11BFBB00F3F038 /* Learn the Clock! */,
+				7D22E4912F47C14A005209EA /* Learn The Clock! */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		7D44FE142F11BFBB00F3F038 /* Resources */ = {
+		7D22E4902F47C14A005209EA /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -115,7 +115,7 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		7D44FE122F11BFBB00F3F038 /* Sources */ = {
+		7D22E48E2F47C14A005209EA /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -125,7 +125,7 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
-		7D44FE1F2F11BFBD00F3F038 /* Debug */ = {
+		7D22E49B2F47C14C005209EA /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -178,7 +178,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
@@ -189,7 +189,7 @@
 			};
 			name = Debug;
 		};
-		7D44FE202F11BFBD00F3F038 /* Release */ = {
+		7D22E49C2F47C14C005209EA /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -236,7 +236,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
@@ -246,7 +246,7 @@
 			};
 			name = Release;
 		};
-		7D44FE222F11BFBD00F3F038 /* Debug */ = {
+		7D22E49E2F47C14C005209EA /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -259,14 +259,15 @@
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = UIInterfaceOrientationPortrait;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.sebastianstrus.Learn-the-Clock-";
+				PRODUCT_BUNDLE_IDENTIFIER = com.sebastianstrus.learntheclock;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -278,7 +279,7 @@
 			};
 			name = Debug;
 		};
-		7D44FE232F11BFBD00F3F038 /* Release */ = {
+		7D22E49F2F47C14C005209EA /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -291,14 +292,15 @@
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = UIInterfaceOrientationPortrait;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.sebastianstrus.Learn-the-Clock-";
+				PRODUCT_BUNDLE_IDENTIFIER = com.sebastianstrus.learntheclock;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -313,25 +315,25 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		7D44FE112F11BFBB00F3F038 /* Build configuration list for PBXProject "Learn the Clock!" */ = {
+		7D22E48D2F47C14A005209EA /* Build configuration list for PBXProject "Learn The Clock!" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				7D44FE1F2F11BFBD00F3F038 /* Debug */,
-				7D44FE202F11BFBD00F3F038 /* Release */,
+				7D22E49B2F47C14C005209EA /* Debug */,
+				7D22E49C2F47C14C005209EA /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		7D44FE212F11BFBD00F3F038 /* Build configuration list for PBXNativeTarget "Learn the Clock!" */ = {
+		7D22E49D2F47C14C005209EA /* Build configuration list for PBXNativeTarget "Learn The Clock!" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				7D44FE222F11BFBD00F3F038 /* Debug */,
-				7D44FE232F11BFBD00F3F038 /* Release */,
+				7D22E49E2F47C14C005209EA /* Debug */,
+				7D22E49F2F47C14C005209EA /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
-	rootObject = 7D44FE0E2F11BFBB00F3F038 /* Project object */;
+	rootObject = 7D22E48A2F47C14A005209EA /* Project object */;
 }

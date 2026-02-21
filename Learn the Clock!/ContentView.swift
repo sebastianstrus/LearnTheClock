@@ -1,8 +1,8 @@
 //
 //  ContentView.swift
-//  Learn the Clock!
+//  Learn The Clock!
 //
-//  Created by Sebastian Strus on 1/9/26.
+//  Created by Sebastian Strus on 2/19/26.
 //
 
 import SwiftUI
