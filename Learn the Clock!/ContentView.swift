@@ -15,16 +15,14 @@ struct ClockTask: Identifiable {
 }
 
 
-
-// MARK: - Grid View
+// MARK: - Clock Grid View
 struct ClockGridView: View {
     
     @StateObject private var viewModel: ClockGameViewModel
-    
+    @State private var showCoins = false
+
     init(settings: SettingsManager) {
-        _viewModel = StateObject(
-            wrappedValue: ClockGameViewModel(settings: settings)
-        )
+        _viewModel = StateObject(wrappedValue: ClockGameViewModel(settings: settings))
     }
     
     private var columnSpacing: CGFloat {
@@ -50,24 +48,45 @@ struct ClockGridView: View {
             
             ScrollView {
                 LazyVGrid(columns: columns, spacing: 40) {
-                    ForEach(viewModel.tasks) { task in
-                        ClockTaskView(task: task)
+                    ForEach(viewModel.tasks.indices, id: \.self) { index in
+                        ClockTaskView(
+                            task: viewModel.tasks[index],
+                            viewModel: viewModel,
+                            onTaskSolved: checkAllTasksSolved
+                        )
                     }
                 }
                 .padding()
+            }
+            
+            if showCoins {
+                FallingCoinsView()
+                    .transition(.opacity.combined(with: .scale))
+                    .zIndex(1)
             }
         }
         .navigationTitle("Ustaw poprawny czas ⏰")
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {
             viewModel.resetGame()
+            showCoins = false
         }
+        .animation(.spring(), value: showCoins)
+    }
+    
+    private func checkAllTasksSolved() {
+        if viewModel.allTasksSolved() {
+                showCoins = true
+            }
     }
 }
 
 // MARK: - Single Task View
+// MARK: - Single Clock Task View
 struct ClockTaskView: View {
     let task: ClockTask
+    @ObservedObject var viewModel: ClockGameViewModel
+    var onTaskSolved: () -> Void  // Closure to notify parent when solved
 
     @State private var hourAngle: Double = 0
     @State private var minuteAngle: Double = 0
@@ -79,11 +98,7 @@ struct ClockTaskView: View {
             Text(formatted(time: task.date))
                 .font(.system(size: 24, weight: .bold, design: .rounded))
                 .foregroundStyle(
-                    LinearGradient(
-                        colors: [.blue, .purple],
-                        startPoint: .leading,
-                        endPoint: .trailing
-                    )
+                    LinearGradient(colors: [.blue, .purple], startPoint: .leading, endPoint: .trailing)
                 )
                 .padding(.horizontal, 20)
                 .padding(.vertical, 8)
@@ -96,11 +111,7 @@ struct ClockTaskView: View {
                 minuteAngle: $minuteAngle,
                 isCorrect: isCorrect,
                 isLocked: isCorrect,
-                onDragEnded: {
-                    withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                        check()
-                    }
-                }
+                onDragEnded: { check() }
             )
             .frame(maxWidth: .infinity)
             .aspectRatio(1, contentMode: .fit)
@@ -120,42 +131,25 @@ struct ClockTaskView: View {
         .background(Color.white)
         .cornerRadius(20)
         .shadow(color: isCorrect ? .green.opacity(0.3) : .black.opacity(0.1), radius: 12, y: 6)
-        /*.onChange(of: hourAngle) { _ in
-            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                check()
-            }
-        }
-        .onChange(of: minuteAngle) { _ in
-            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                check()
-            }
-        }*/
     }
 
     private func check() {
-        // Jeśli już poprawnie ustawione, nie sprawdzaj ponownie
-        if isCorrect {
-            return
-        }
-        
+        guard !isCorrect else { return }
+
         let components = Calendar.current.dateComponents([.hour, .minute], from: task.date)
-        let targetHour24 = components.hour!
-        let targetMinute = components.minute!
+        let targetHourAngle = (Double(components.hour! % 12) * 30) + (Double(components.minute!) / 60 * 30)
+        let targetMinuteAngle = Double(components.minute!) * 6
 
-        let targetHourAngle = (Double(targetHour24 % 12) * 30)
-            + (Double(targetMinute) / 60.0 * 30.0)
-
-        let targetMinuteAngle = Double(targetMinute) * 6
-
-        let hourDiff = angularDifference(hourAngle, targetHourAngle)
-        let minuteDiff = angularDifference(minuteAngle, targetMinuteAngle)
+        let tolerance = viewModel.toleranceForDifficulty()
 
         let wasCorrect = isCorrect
-        isCorrect = hourDiff < (10.0 / 3.0) && minuteDiff < (5.0 / 3.0)
-        
-        // Odtwórz dźwięk gdy po raz pierwszy ustawiono poprawnie
+        isCorrect = angularDifference(hourAngle, targetHourAngle) < tolerance.hour &&
+                    angularDifference(minuteAngle, targetMinuteAngle) < tolerance.minute
+
         if isCorrect && !wasCorrect {
             playSuccessSound()
+            viewModel.markTaskSolved(task)   // 👈 mark in ViewModel
+            onTaskSolved()
         }
     }
 
@@ -167,20 +161,16 @@ struct ClockTaskView: View {
     private func formatted(time: Date) -> String {
         let formatter = DateFormatter()
         formatter.dateFormat = "HH:mm"
-        return formatter.string(from: time)
+        return formatter.string(from: task.date)
     }
-    
+
     private func playSuccessSound() {
-        guard let soundURL = Bundle.main.url(forResource: "stars", withExtension: "m4a") else {
-            print("Nie znaleziono pliku stars.m4a")
-            return
-        }
-        
+        guard let soundURL = Bundle.main.url(forResource: "stars", withExtension: "m4a") else { return }
         do {
             audioPlayer = try AVAudioPlayer(contentsOf: soundURL)
             audioPlayer?.play()
         } catch {
-            print("Błąd odtwarzania dźwięku: \(error)")
+            print("Failed to play sound: \(error)")
         }
     }
 }
@@ -428,3 +418,85 @@ struct Triangle: Shape {
     }
 }
 
+
+
+
+import SwiftUI
+import MediaPlayer
+
+struct FallingCoinsView: View {
+    @State private var coins: [Coin] = []
+    @State private var timer: Timer?
+    @State private var audioPlayer: AVAudioPlayer?
+
+    let screenWidth = UIScreen.main.bounds.width
+    let screenHeight = UIScreen.main.bounds.height
+
+    var body: some View {
+        ZStack {
+            Color.black.opacity(0.7).edgesIgnoringSafeArea(.all)
+            
+            ForEach(coins) { coin in
+                Image("coin")
+                    .resizable()
+                    .frame(width: coin.size, height: coin.size)
+                    .rotationEffect(.degrees(coin.rotation))
+                    .position(x: coin.x, y: coin.y)
+                    .onAppear {
+                        animateCoinDrop(coin)
+                    }
+            }
+        }
+        .onAppear {
+            startCoinRain()
+//            playCoinSound()
+            SoundManager.shared.playSound(named: "coin_sound", loop: true)
+        }
+        .onDisappear {
+            stopCoinRain()
+            SoundManager.shared.stopSound()
+        }
+    }
+
+    func startCoinRain() {
+        timer = Timer.scheduledTimer(withTimeInterval: 0.02, repeats: true) { _ in
+            let newCoin = Coin(
+                id: UUID(),
+                x: CGFloat.random(in: 0...screenWidth),
+                y: -150,
+                size: CGFloat.random(in: 50...200),
+                rotation: Double.random(in: 0...200),
+                duration: Double.random(in: 0.7...3)
+            )
+            coins.append(newCoin)
+        }
+    }
+
+    func animateCoinDrop(_ coin: Coin) {
+        if let index = coins.firstIndex(where: { $0.id == coin.id }) {
+            withAnimation(.linear(duration: coin.duration)) {
+                coins[index].y = screenHeight + 50
+            }
+
+            // Usunięcie monety po animacji
+            DispatchQueue.main.asyncAfter(deadline: .now() + coin.duration) {
+                coins.removeAll { $0.id == coin.id }
+            }
+        }
+    }
+
+    func stopCoinRain() {
+        timer?.invalidate()
+        timer = nil
+    }
+
+}
+
+struct Coin: Identifiable {
+    let id: UUID
+    var x: CGFloat
+    var y: CGFloat
+    var size: CGFloat
+    var rotation: Double
+    var duration: Double
+}
