@@ -95,7 +95,12 @@ struct ClockTaskView: View {
                 hourAngle: $hourAngle,
                 minuteAngle: $minuteAngle,
                 isCorrect: isCorrect,
-                isLocked: isCorrect
+                isLocked: isCorrect,
+                onDragEnded: {
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                        check()
+                    }
+                }
             )
             .frame(maxWidth: .infinity)
             .aspectRatio(1, contentMode: .fit)
@@ -115,7 +120,7 @@ struct ClockTaskView: View {
         .background(Color.white)
         .cornerRadius(20)
         .shadow(color: isCorrect ? .green.opacity(0.3) : .black.opacity(0.1), radius: 12, y: 6)
-        .onChange(of: hourAngle) { _ in
+        /*.onChange(of: hourAngle) { _ in
             withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
                 check()
             }
@@ -124,7 +129,7 @@ struct ClockTaskView: View {
             withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
                 check()
             }
-        }
+        }*/
     }
 
     private func check() {
@@ -186,6 +191,8 @@ struct AnalogClockView: View {
     @Binding var minuteAngle: Double
     var isCorrect: Bool
     var isLocked: Bool
+    
+    var onDragEnded: (() -> Void)?
     
     @State private var draggingHand: DraggingHand? = nil
     
@@ -306,6 +313,7 @@ struct AnalogClockView: View {
                     }
                     .onEnded { _ in
                         draggingHand = nil
+                        onDragEnded?()
                     }
             )
         }
