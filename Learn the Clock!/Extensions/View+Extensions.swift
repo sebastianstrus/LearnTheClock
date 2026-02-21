@@ -1,0 +1,108 @@
+//
+//  View+Extensions.swift
+//  Learn The Clock!
+//
+//  Created by Sebastian Strus on 2/21/26.
+//
+
+import SwiftUI
+import SwiftUI
+import MessageUI
+import UIKit
+
+
+extension View {
+    
+    
+    
+    
+    func styledSlider() -> some View {
+        
+        return self
+        
+            .frame(width: 100, height: 50)
+            .cornerRadius(12)
+        
+            .overlay(
+                RoundedRectangle(cornerRadius: 5)
+                    .fill(Color(.white))
+                    .frame(width: 100, height: 4)
+                    .allowsHitTesting(false)
+                
+            )
+        
+            .overlay(
+                HStack(spacing: 0) {
+                    Rectangle()
+                        .fill(Color.white)
+                        .frame(width: 2, height: 8)
+                    
+                    Spacer()
+                    
+                    Rectangle()
+                        .fill(Color.white)
+                        .frame(width: 2, height: 8)
+                    
+                    Spacer()
+                    
+                    Rectangle()
+                        .fill(Color(.white))
+                        .frame(width: 2, height: 8)
+                    
+                    Spacer()
+                    
+                    Rectangle()
+                        .fill(Color(.white))
+                        .frame(width: 2, height: 8)
+                    
+                    Spacer()
+                    
+                    Rectangle()
+                        .fill(Color(.white))
+                        .frame(width: 2, height: 8)
+                    
+                    Spacer()
+                    
+                    Rectangle()
+                        .fill(Color(.white))
+                        .frame(width: 2, height: 8)
+                    
+                }.allowsHitTesting(false)
+                    .frame(width: 94)
+            )
+            .padding()
+            .background(
+                LinearGradient(gradient: Gradient(colors: [Color.blue, Color.purple]), startPoint: .leading, endPoint: .trailing)
+                    .frame(height: 50)
+                    .cornerRadius(12)
+            )
+            .cornerRadius(12)
+            .shadow(color: Color.blue.opacity(0.4), radius: 10, x: 0, y: 5)
+            .accentColor(Color(.white))
+    }
+}
+
+
+extension View {
+    @ViewBuilder
+    func `if`<Content: View>(_ condition: Bool, transform: (Self) -> Content) -> some View {
+        if condition {
+            transform(self)
+        } else {
+            self
+        }
+    }
+    
+    @ViewBuilder
+    func `if`<TrueContent: View, FalseContent: View>(
+        _ condition: Bool,
+        if ifTransform: (Self) -> TrueContent,
+        else elseTransform: (Self) -> FalseContent
+    ) -> some View {
+        if condition {
+            ifTransform(self)
+        } else {
+            elseTransform(self)
+        }
+    }
+}
