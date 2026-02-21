@@ -61,7 +61,7 @@ struct ClockGridView: View {
             
             if showCoins {
                 FallingCoinsView()
-                    .transition(.opacity.combined(with: .scale))
+                    .transition(.opacity)
                     .zIndex(1)
             }
         }
