@@ -68,21 +68,12 @@ struct WelcomeView: View {
                         NavigationLink(destination: ClockGridView(settings: settings)
                             //.environmentObject(settings)
                         ) {
-                            Text("Start")
+                            Text("Start Learning")
                                 .font(.system(size: 20, weight: .bold, design: .rounded))
                                 .foregroundColor(.white)
                                 .padding(.horizontal, 40)
                                 .padding(.vertical, 16)
-                                .background(
-                                    Capsule()
-                                        .fill(LinearGradient(gradient: Gradient(colors: [.blue, .purple]),
-                                                             startPoint: .leading,
-                                                             endPoint: .trailing))
-                                )
-                                .shadow(color: .purple.opacity(0.4), radius: 10, x: 0, y: 4)
-                            
-                            
-                            
+                                .glassEffect()
                         }
 
                         Spacer()
