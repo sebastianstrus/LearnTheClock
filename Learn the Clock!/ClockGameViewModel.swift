@@ -14,7 +14,7 @@ final class ClockGameViewModel: ObservableObject {
     @Published var tasks: [ClockTask] = []
     @Published var solvedTasks: [UUID: Bool] = [:]
     
-    private let settings: SettingsManager
+    let settings: SettingsManager
     
     init(settings: SettingsManager) {
         self.settings = settings

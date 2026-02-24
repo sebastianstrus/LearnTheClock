@@ -20,6 +20,11 @@ struct ClockGridView: View {
     
     @StateObject private var viewModel: ClockGameViewModel
     @State private var showCoins = false
+    @State private var shouldShowNameAlert = false
+    @State private var userName = ""
+    @State private var startTime: Date?
+    @State private var elapsedTime: TimeInterval = 0
+    @State private var timer: Timer?
 
     init(settings: SettingsManager) {
         _viewModel = StateObject(wrappedValue: ClockGameViewModel(settings: settings))
@@ -70,14 +75,72 @@ struct ClockGridView: View {
         .onAppear {
             viewModel.resetGame()
             showCoins = false
+            startTimer()
+        }
+        .onDisappear {
+            stopTimer()
         }
         .animation(.spring(), value: showCoins)
+        .alert("Congratulations!".localized + "\n" + elapsedTime.formattedTime, isPresented: $shouldShowNameAlert) {
+            TextField("Nickname".localized, text: $userName)
+            Button("Save".localized) {
+                saveResultAndShowVictory()
+            }
+            Button("Skip".localized, role: .cancel) {
+                //showingVictoryView = true
+            }
+        } message: {
+            Text("Enter your nickname to save the result".localized)
+        }
+        .onChange(of: showCoins) { completed in
+            if completed {
+                stopTimer()
+                shouldShowNameAlert = true
+            }
+        }
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Text(elapsedTime.formattedTimeWithMilliseconds)
+                    .font(.system(size: UIDevice.current.userInterfaceIdiom == .pad ? 20 : 16,
+                                  weight: .bold,
+                                  design: .monospaced))
+                    .foregroundColor(.blue.opacity(viewModel.settings.isTimerOn ? 1 : 0))
+            }
+        }
     }
+    
+
     
     private func checkAllTasksSolved() {
         if viewModel.allTasksSolved() {
                 showCoins = true
             }
+    }
+    
+    private func saveResultAndShowVictory() {
+        let difficulty = DifficultyLevel(rawValue: viewModel.settings.difficultyLevel) ?? .medium
+        viewModel.settings.saveGameResult(
+            name: userName.isEmpty ? "Anonymous" : userName,
+            difficulty: difficulty,
+            exampleCount: viewModel.settings.exampleCount,
+            time: elapsedTime
+        )
+    }
+    
+    private func startTimer() {
+        guard startTime == nil else { return }
+        startTime = Date()
+        timer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { _ in
+            if let startTime = startTime {
+                elapsedTime = Date().timeIntervalSince(startTime)
+            }
+        }
+        RunLoop.current.add(timer!, forMode: .common)
+    }
+    
+    private func stopTimer() {
+        timer?.invalidate()
+        timer = nil
     }
 }
 

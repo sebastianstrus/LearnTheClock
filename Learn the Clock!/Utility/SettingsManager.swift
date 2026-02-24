@@ -193,7 +193,7 @@ class SettingsManager: ObservableObject {
 
     
     func resetSettings() {
-        exampleCount = 30
+        exampleCount = 3//0  TODO
         isDarkMode = false
         isTimerOn = true
         difficultyLevel = DifficultyLevel.medium.rawValue

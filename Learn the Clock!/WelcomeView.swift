@@ -65,7 +65,7 @@ struct WelcomeView: View {
                 Spacer()
                 
                 Group {
-                        NavigationLink(destination: ClockGridView(settings: settings)
+                    NavigationLink(destination: ClockGridView(settings: settings)
                             //.environmentObject(settings)
                         ) {
                             Text("Start Learning")
