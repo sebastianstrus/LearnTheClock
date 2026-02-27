@@ -55,7 +55,7 @@ struct WelcomeView: View {
                         .foregroundStyle(.white.opacity(0.9))
                         .shadow(color: .black.opacity(0.8), radius: 3, x: 3, y: 3)
                     
-                    Text("Discover the Magic of the Clock")
+                    Text("Discover the Magic of the Time")
                         .font(.system(size: subtitleSize, weight: .regular, design: .rounded))
                         .foregroundStyle(.white.opacity(0.9))
                         .shadow(color: .black.opacity(0.8), radius: 2, x: 2, y: 2)
