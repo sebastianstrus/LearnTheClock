@@ -85,7 +85,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 7D22E48D2F47C14A005209EA /* Build configuration list for PBXProject "Learn The Clock!" */;
+			buildConfigurationList = 7D22E48D2F47C14A005209EA /* Build configuration list for PBXProject "Learn the Clock!" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -259,6 +259,7 @@
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UIRequiresFullScreen = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -291,6 +292,7 @@
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UIRequiresFullScreen = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -313,7 +315,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		7D22E48D2F47C14A005209EA /* Build configuration list for PBXProject "Learn The Clock!" */ = {
+		7D22E48D2F47C14A005209EA /* Build configuration list for PBXProject "Learn the Clock!" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				7D22E49B2F47C14C005209EA /* Debug */,

@@ -36,7 +36,7 @@ final class ClockGameViewModel: ObservableObject {
         let count = settings.exampleCount
         
         tasks = (0..<count).map { _ in
-            let hour = Int.random(in: 0...23)
+            let hour = settings.is24HourClock ? Int.random(in: 0...23) : Int.random(in: 1...12)
             let minute = Int.random(in: 0...11) * 5
             
             var components = DateComponents()

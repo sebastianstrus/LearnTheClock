@@ -97,6 +97,7 @@ enum UserDefaultsKeys: String {
     case exampleCount
     case primaryLanguage = "AppleLanguages"
     case isTimerOn
+    case is24HourClock
 }
 
 struct GameResult: Codable, Identifiable {
@@ -106,10 +107,11 @@ struct GameResult: Codable, Identifiable {
     let exampleCount: Int
     let time: TimeInterval
     let date: Date
+    let is24HourClock: Bool
     
     // Add CodingKeys if you want to customize the JSON keys
     enum CodingKeys: String, CodingKey {
-        case id, name, difficulty, exampleCount, time, date
+        case id, name, difficulty, exampleCount, time, date, is24HourClock
     }
 }
 
@@ -134,6 +136,8 @@ class SettingsManager: ObservableObject {
     
     @AppStorage(UserDefaultsKeys.isTimerOn.rawValue) var isTimerOn: Bool = true
     
+    @AppStorage(UserDefaultsKeys.is24HourClock.rawValue) var is24HourClock: Bool = true
+    
     @AppStorage(UserDefaultsKeys.exampleCount.rawValue) var exampleCount: Int = 30
     @AppStorage(UserDefaultsKeys.difficultyLevel.rawValue) var difficultyLevel: Int = DifficultyLevel.medium.rawValue
     
@@ -154,14 +158,15 @@ class SettingsManager: ObservableObject {
     
     private let statisticsKey = "gameStatistics"
 
-    func saveGameResult(name: String, difficulty: DifficultyLevel, exampleCount: Int, time: TimeInterval) {
+    func saveGameResult(name: String, difficulty: DifficultyLevel, exampleCount: Int, time: TimeInterval, is24HourClock: Bool) {
         var results = loadGameResults()
         let newResult = GameResult(
             name: name,
             difficulty: difficulty,
             exampleCount: exampleCount,
             time: time,
-            date: Date()
+            date: Date(),
+            is24HourClock: is24HourClock
         )
         results.append(newResult)
         
@@ -193,7 +198,7 @@ class SettingsManager: ObservableObject {
 
     
     func resetSettings() {
-        exampleCount = 3//0  TODO
+        exampleCount = 30
         isDarkMode = false
         isTimerOn = true
         difficultyLevel = DifficultyLevel.medium.rawValue

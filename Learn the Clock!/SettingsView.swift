@@ -55,12 +55,18 @@ struct SettingsView: View {
 
                 
                 Section(header: learningSectionHeader) {
-                    Picker("Difficulty Level".localized, selection: $settings.difficultyLevel) {
-                        ForEach(DifficultyLevel.allCases, id: \.self) { level in
-                            Text(level.localizedName).tag(level.rawValue)
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("Difficulty (Precision)".localized)
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                        Picker("Difficulty Level".localized, selection: $settings.difficultyLevel) {
+                            ForEach(DifficultyLevel.allCases, id: \.self) { level in
+                                Text(level.localizedName).tag(level.rawValue)
+                            }
                         }
+                        .pickerStyle(.segmented)
+                        
                     }
-                    .pickerStyle(.segmented)
                     
                     HStack(alignment: .center) {
                         Text("Example Count".localized)
@@ -81,6 +87,7 @@ struct SettingsView: View {
                             in: range,
                             step: step
                         )
+                        .tint(.purple)
                         
                         Text("\(settings.exampleCount)")
                             .monospacedDigit()
@@ -89,6 +96,9 @@ struct SettingsView: View {
                     
                     
                     Toggle("Display Timer".localized, isOn: settings.$isTimerOn)
+                        .tint(.purple)
+                    
+                    Toggle("24h format".localized, isOn: settings.$is24HourClock)
                         .tint(.purple)
                     
 
@@ -247,7 +257,7 @@ struct StatisticsView: View {
     }
     
     private func columnHeaders() -> some View {
-        HStack(spacing: 8) {
+        HStack(spacing: 4) {
             // Name header
             Text("Nickname".localized)
                 .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
@@ -256,6 +266,12 @@ struct StatisticsView: View {
             
             // Count header
             Text("Count".localized)
+                .frame(minWidth: 0, maxWidth: .infinity, alignment: .center)
+                .font(Font.system(size: 13).bold())
+                .foregroundColor(.primary)
+            
+            // Format header
+            Text("Format".localized)
                 .frame(minWidth: 0, maxWidth: .infinity, alignment: .center)
                 .font(Font.system(size: 13).bold())
                 .foregroundColor(.primary)
@@ -288,15 +304,10 @@ struct StatisticsView: View {
     private func resultsSection(for difficulty: DifficultyLevel) -> some View {
         let results = settings.loadGameResults()
             .filter { $0.difficulty == difficulty }
-            .sorted {
-                // Primary sort by example count (descending)
-                if $0.exampleCount != $1.exampleCount {
-                    return $0.exampleCount > $1.exampleCount
-                }
-                // Secondary sort by time (ascending - fastest first)
-                return $0.time < $1.time
-            }
-        
+            .sorted { $0.time < $1.time }
+            .sorted { $0.is24HourClock && !$1.is24HourClock }
+            .sorted { $0.exampleCount > $1.exampleCount }
+                
         return Group {
             if results.isEmpty {
                 Text("No results yet".localized)
@@ -306,7 +317,7 @@ struct StatisticsView: View {
                     .padding(.vertical, 8)
             } else {
                 ForEach(results) { result in
-                    HStack(spacing: 8) {
+                    HStack(spacing: 4) {
                         // Name column
                         Text(result.name)
                             .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
@@ -314,6 +325,11 @@ struct StatisticsView: View {
                         
                         // Example count column
                         Text("\(result.exampleCount)")
+                            .frame(minWidth: 0, maxWidth: .infinity, alignment: .center)
+                            .font(.system(size: 13, design: .monospaced))
+                        
+                        // Format column
+                        Text(result.is24HourClock ? "24h" : "12h")
                             .frame(minWidth: 0, maxWidth: .infinity, alignment: .center)
                             .font(.system(size: 13, design: .monospaced))
                         

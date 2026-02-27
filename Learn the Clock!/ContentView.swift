@@ -16,6 +16,7 @@ struct ClockTask: Identifiable {
 
 
 // MARK: - Clock Grid View
+// MARK: - Clock Sequential View (replaces ClockGridView)
 struct ClockGridView: View {
     
     @StateObject private var viewModel: ClockGameViewModel
@@ -25,21 +26,10 @@ struct ClockGridView: View {
     @State private var startTime: Date?
     @State private var elapsedTime: TimeInterval = 0
     @State private var timer: Timer?
+    @State private var currentTaskIndex: Int = 0
 
     init(settings: SettingsManager) {
         _viewModel = StateObject(wrappedValue: ClockGameViewModel(settings: settings))
-    }
-    
-    private var columnSpacing: CGFloat {
-        UIDevice.current.userInterfaceIdiom == .pad ? 16 : 4
-    }
-
-    private var columns: [GridItem] {
-        [
-            GridItem(.flexible(), spacing: columnSpacing),
-            GridItem(.flexible(), spacing: columnSpacing),
-            GridItem(.flexible(), spacing: columnSpacing)
-        ]
     }
 
     var body: some View {
@@ -50,20 +40,34 @@ struct ClockGridView: View {
                 endPoint: .bottomTrailing
             )
             .ignoresSafeArea()
-            
-            ScrollView {
-                LazyVGrid(columns: columns, spacing: 40) {
-                    ForEach(viewModel.tasks.indices, id: \.self) { index in
-                        ClockTaskView(
-                            task: viewModel.tasks[index],
-                            viewModel: viewModel,
-                            onTaskSolved: checkAllTasksSolved
-                        )
-                    }
+
+            VStack(spacing: 24) {
+                // Task progress label
+                if !viewModel.tasks.isEmpty {
+                    Text("Task \(currentTaskIndex + 1) / \(viewModel.tasks.count)")
+                        .font(.system(size: 22, weight: .bold, design: .rounded))
+                        .foregroundColor(.purple)
+                        .padding(.top, 12)
                 }
-                .padding()
+
+                // Current clock task
+                if !viewModel.tasks.isEmpty && currentTaskIndex < viewModel.tasks.count {
+                    ClockTaskView(
+                        task: viewModel.tasks[currentTaskIndex],
+                        viewModel: viewModel,
+                        onTaskSolved: handleTaskSolved
+                    )
+                    .padding(.horizontal, 24)
+                    .transition(.asymmetric(
+                        insertion: .move(edge: .trailing).combined(with: .opacity),
+                        removal: .move(edge: .leading).combined(with: .opacity)
+                    ))
+                    .id(currentTaskIndex) // forces SwiftUI to recreate view on index change
+                }
+
+                Spacer()
             }
-            
+
             if showCoins {
                 FallingCoinsView()
                     .transition(.opacity)
@@ -74,6 +78,7 @@ struct ClockGridView: View {
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {
             viewModel.resetGame()
+            currentTaskIndex = 0
             showCoins = false
             startTimer()
         }
@@ -81,14 +86,13 @@ struct ClockGridView: View {
             stopTimer()
         }
         .animation(.spring(), value: showCoins)
+        .animation(.easeInOut(duration: 0.35), value: currentTaskIndex)
         .alert("Congratulations!".localized + "\n" + elapsedTime.formattedTime, isPresented: $shouldShowNameAlert) {
             TextField("Nickname".localized, text: $userName)
             Button("Save".localized) {
                 saveResultAndShowVictory()
             }
-            Button("Skip".localized, role: .cancel) {
-                //showingVictoryView = true
-            }
+            Button("Skip".localized, role: .cancel) { }
         } message: {
             Text("Enter your nickname to save the result".localized)
         }
@@ -108,25 +112,25 @@ struct ClockGridView: View {
             }
         }
     }
-    
 
-    
-    private func checkAllTasksSolved() {
-        if viewModel.allTasksSolved() {
+    // MARK: - Task Solved Handler
+    private func handleTaskSolved() {
+        let nextIndex = currentTaskIndex + 1
+
+        if nextIndex < viewModel.tasks.count {
+            // Brief delay so the ✅ "Świetnie!" is visible before advancing
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
+                currentTaskIndex = nextIndex
+            }
+        } else {
+            // All tasks done
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
                 showCoins = true
             }
+        }
     }
-    
-    private func saveResultAndShowVictory() {
-        let difficulty = DifficultyLevel(rawValue: viewModel.settings.difficultyLevel) ?? .medium
-        viewModel.settings.saveGameResult(
-            name: userName.isEmpty ? "Anonymous" : userName,
-            difficulty: difficulty,
-            exampleCount: viewModel.settings.exampleCount,
-            time: elapsedTime
-        )
-    }
-    
+
+    // MARK: - Timer
     private func startTimer() {
         guard startTime == nil else { return }
         startTime = Date()
@@ -137,14 +141,25 @@ struct ClockGridView: View {
         }
         RunLoop.current.add(timer!, forMode: .common)
     }
-    
+
     private func stopTimer() {
         timer?.invalidate()
         timer = nil
     }
+
+    // MARK: - Save Result
+    private func saveResultAndShowVictory() {
+        let difficulty = DifficultyLevel(rawValue: viewModel.settings.difficultyLevel) ?? .medium
+        viewModel.settings.saveGameResult(
+            name: userName.isEmpty ? "Anonymous" : userName,
+            difficulty: difficulty,
+            exampleCount: viewModel.settings.exampleCount,
+            time: elapsedTime,
+            is24HourClock: viewModel.settings.is24HourClock
+        )
+    }
 }
 
-// MARK: - Single Task View
 // MARK: - Single Clock Task View
 struct ClockTaskView: View {
     let task: ClockTask
@@ -223,7 +238,7 @@ struct ClockTaskView: View {
 
     private func formatted(time: Date) -> String {
         let formatter = DateFormatter()
-        formatter.dateFormat = "HH:mm"
+        formatter.dateFormat = viewModel.settings.is24HourClock ? "HH:mm" : "hh:mm"
         return formatter.string(from: task.date)
     }
 
@@ -522,13 +537,13 @@ struct FallingCoinsView: View {
     }
 
     func startCoinRain() {
-        timer = Timer.scheduledTimer(withTimeInterval: 0.02, repeats: true) { _ in
+        timer = Timer.scheduledTimer(withTimeInterval: 0.04, repeats: true) { _ in
             let newCoin = Coin(
                 id: UUID(),
                 x: CGFloat.random(in: 0...screenWidth),
                 y: -150,
                 size: CGFloat.random(in: 50...200),
-                rotation: Double.random(in: 0...200),
+                rotation: Double.random(in: 0...400),
                 duration: Double.random(in: 0.7...3)
             )
             coins.append(newCoin)
