@@ -1,0 +1,67 @@
+# =========================
+# macOS
+# =========================
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# =========================
+# Xcode
+# =========================
+
+## User settings
+xcuserdata/
+*.xcuserstate
+*.xcscmblueprint
+
+## Workspace user data
+*.xcworkspace/xcuserdata/
+*.xcodeproj/xcuserdata/
+
+## Xcode build data
+DerivedData/
+build/
+
+## Swift Package Manager
+.swiftpm/
+.build/
+Packages/
+
+## CocoaPods
+Pods/
+Podfile.lock
+
+## Carthage
+Carthage/Build/
+
+## Fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/
+fastlane/test_output/
+
+## Code coverage
+*.gcda
+*.gcno
+*.profdata
+*.profraw
+
+## Archives
+*.xcarchive
+
+# =========================
+# App-specific
+# =========================
+
+# Environment / secrets
+.env
+*.key
+*.p12
+*.mobileprovision
+
+# Logs
+*.log
+
+# Temporary files
+*.swp
+*.tmp
