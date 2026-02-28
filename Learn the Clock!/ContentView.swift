@@ -457,23 +457,25 @@ struct AnalogClockView: View {
                     .padding(size * 0.065)
                     .blur(radius: 4)
 
-                // ── Layer 8: Hour hand ─────────────────────────────────────
+                // ── Layer 8 & 9: Clock hands (2× thickness on iPad) ───────
+                let isPad = UIDevice.current.userInterfaceIdiom == .pad
+                let handScale: CGFloat = isPad ? 2.0 : 1.0
+
                 TaperedClockHand(
                     length: center * 0.62,
                     tailLength: center * 0.15,
-                    tipWidth: 3.5,
-                    baseWidth: 12,
+                    tipWidth: 3.5 * handScale,
+                    baseWidth: 12  * handScale,
                     angle: hourAngle,
                     fillColor: draggingHand == .hour ? DS.handDragging : Color(hex: "#1A1A2E"),
                     isDragging: draggingHand == .hour
                 )
 
-                // ── Layer 9: Minute hand ───────────────────────────────────
                 TaperedClockHand(
                     length: center * 0.84,
                     tailLength: center * 0.17,
-                    tipWidth: 2,
-                    baseWidth: 8,
+                    tipWidth: 2   * handScale,
+                    baseWidth: 8  * handScale,
                     angle: minuteAngle,
                     fillColor: draggingHand == .minute ? DS.handDragging : DS.accent,
                     isDragging: draggingHand == .minute
@@ -504,7 +506,7 @@ struct AnalogClockView: View {
 
     private func numberPosition(for angle: Double, size: CGFloat) -> CGPoint {
         // 0.315 keeps numbers inside the longest (20 pt) tick mark at any clock size
-        let r = size * 0.315
+        let r = size * 0.335
         let rad = (angle - 90) * .pi / 180
         return CGPoint(x: size/2 + r * CGFloat(cos(rad)),
                        y: size/2 + r * CGFloat(sin(rad)))
