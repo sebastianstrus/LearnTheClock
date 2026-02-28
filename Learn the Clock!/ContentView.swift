@@ -413,26 +413,28 @@ struct AnalogClockView: View {
                     .padding(size * 0.065)
 
                 // ── Layer 5: Tick marks ────────────────────────────────────
+                // Each tick's outer tip is flush with the face circle edge.
+                // It grows inward, so numbers (at 0.315*size radius) are
+                // always below the tick bottom — zero overlap guaranteed.
                 ForEach(0..<60) { tick in
-                    let isHour      = tick % 5 == 0
-                    let isQuarter   = tick % 15 == 0
-                    let tickW: CGFloat  = isQuarter ? 3   : isHour ? 2   : 1
-                    let tickH: CGFloat  = isQuarter ? 18  : isHour ? 13  : 6
-                    let tickOpacity     = isQuarter ? 1.0 : isHour ? 0.8 : 0.35
-                    let inset: CGFloat  = size * 0.065 + size * 0.028
-
+                    let isHour    = tick % 5  == 0
+                    let isQuarter = tick % 15 == 0
+                    let tickW: CGFloat = isQuarter ? 3.5 : isHour ? 2.5 : 1.2
+                    let tickH: CGFloat = isQuarter ? 20  : isHour ? 14  : 7
+                    // faceRadius = distance from clock centre to face edge
+                    let faceRadius     = center - size * 0.065
+                    // offset so the tick rect centre sits at faceRadius - tickH/2
+                    let tickCenterDist = faceRadius - tickH / 2
                     Rectangle()
                         .fill(
                             isQuarter
-                            ? Color(hex: "#1A1A2E")
-                            : isHour
-                                ? Color(hex: "#374151")
-                                : Color(hex: "#9CA3AF")
+                                ? Color(hex: "#111827")
+                                : isHour ? Color(hex: "#374151") : Color(hex: "#9CA3AF")
                         )
-                        .opacity(tickOpacity)
+                        .opacity(isQuarter ? 1.0 : isHour ? 0.85 : 0.5)
                         .frame(width: tickW, height: tickH)
                         .cornerRadius(tickW / 2)
-                        .offset(y: -(center - inset - tickH / 2))
+                        .offset(y: -tickCenterDist)
                         .rotationEffect(.degrees(Double(tick) * 6))
                 }
 
@@ -457,10 +459,10 @@ struct AnalogClockView: View {
 
                 // ── Layer 8: Hour hand ─────────────────────────────────────
                 TaperedClockHand(
-                    length: center * 0.50,
-                    tailLength: center * 0.12,
+                    length: center * 0.62,
+                    tailLength: center * 0.15,
                     tipWidth: 3.5,
-                    baseWidth: 10,
+                    baseWidth: 12,
                     angle: hourAngle,
                     fillColor: draggingHand == .hour ? DS.handDragging : Color(hex: "#1A1A2E"),
                     isDragging: draggingHand == .hour
@@ -468,10 +470,10 @@ struct AnalogClockView: View {
 
                 // ── Layer 9: Minute hand ───────────────────────────────────
                 TaperedClockHand(
-                    length: center * 0.70,
-                    tailLength: center * 0.14,
+                    length: center * 0.84,
+                    tailLength: center * 0.17,
                     tipWidth: 2,
-                    baseWidth: 7,
+                    baseWidth: 8,
                     angle: minuteAngle,
                     fillColor: draggingHand == .minute ? DS.handDragging : DS.accent,
                     isDragging: draggingHand == .minute
@@ -488,7 +490,7 @@ struct AnalogClockView: View {
                         if draggingHand == nil {
                             draggingHand = closestHand(
                                 touch: value.startLocation, center: cp,
-                                hourLen: center * 0.50, minuteLen: center * 0.70
+                                hourLen: center * 0.62, minuteLen: center * 0.84
                             )
                         }
                         let angle = angleFrom(value.location, center: cp)
@@ -501,7 +503,8 @@ struct AnalogClockView: View {
     }
 
     private func numberPosition(for angle: Double, size: CGFloat) -> CGPoint {
-        let r = size * 0.355
+        // 0.315 keeps numbers inside the longest (20 pt) tick mark at any clock size
+        let r = size * 0.315
         let rad = (angle - 90) * .pi / 180
         return CGPoint(x: size/2 + r * CGFloat(cos(rad)),
                        y: size/2 + r * CGFloat(sin(rad)))
