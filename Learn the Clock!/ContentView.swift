@@ -14,11 +14,55 @@ struct ClockTask: Identifiable {
     let date: Date
 }
 
+// MARK: - Design Tokens
+private enum DS {
+    // Colors
+    static let background     = Color(hex: "#F5F4F0")
+    static let surface        = Color.white
+    static let primary        = Color(hex: "#1A1A2E")
+    static let accent         = Color(hex: "#4F6EF7")
+    static let accentSoft     = Color(hex: "#4F6EF7").opacity(0.12)
+    static let success        = Color(hex: "#22C55E")
+    static let successSoft    = Color(hex: "#22C55E").opacity(0.12)
+    static let textPrimary    = Color(hex: "#1A1A2E")
+    static let textSecondary  = Color(hex: "#6B7280")
+    static let border         = Color(hex: "#E5E7EB")
+    static let handHour       = Color(hex: "#1A1A2E")
+    static let handMinute     = Color(hex: "#4F6EF7")
+    static let handDragging   = Color(hex: "#F59E0B")
+
+    // Typography
+    static func display(_ size: CGFloat) -> Font {
+        .system(size: size, weight: .semibold, design: .rounded)
+    }
+    static func mono(_ size: CGFloat) -> Font {
+        .system(size: size, weight: .medium, design: .monospaced)
+    }
+    static func body(_ size: CGFloat) -> Font {
+        .system(size: size, weight: .regular, design: .default)
+    }
+
+    // Spacing
+    static let radiusCard: CGFloat  = 16
+    static let radiusSmall: CGFloat = 10
+}
+
+// MARK: - Color Hex Extension
+extension Color {
+    init(hex: String) {
+        let scanner = Scanner(string: hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted))
+        var rgb: UInt64 = 0
+        scanner.scanHexInt64(&rgb)
+        let r = Double((rgb >> 16) & 0xFF) / 255
+        let g = Double((rgb >> 8)  & 0xFF) / 255
+        let b = Double(rgb         & 0xFF) / 255
+        self.init(red: r, green: g, blue: b)
+    }
+}
 
 // MARK: - Clock Grid View
-// MARK: - Clock Sequential View (replaces ClockGridView)
 struct ClockGridView: View {
-    
+
     @StateObject private var viewModel: ClockGameViewModel
     @State private var showCoins = false
     @State private var shouldShowNameAlert = false
@@ -34,20 +78,17 @@ struct ClockGridView: View {
 
     var body: some View {
         ZStack {
-            LinearGradient(
-                colors: [Color.blue.opacity(0.1), Color.purple.opacity(0.1)],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-            .ignoresSafeArea()
+            DS.background.ignoresSafeArea()
 
-            VStack(spacing: 24) {
-                // Task progress label
+            VStack(spacing: 28) {
+                // Progress indicator
                 if !viewModel.tasks.isEmpty {
-                    Text("Task \(currentTaskIndex + 1) / \(viewModel.tasks.count)")
-                        .font(.system(size: 22, weight: .bold, design: .rounded))
-                        .foregroundColor(.purple)
-                        .padding(.top, 12)
+                    ProgressHeaderView(
+                        current: currentTaskIndex + 1,
+                        total: viewModel.tasks.count
+                    )
+                    .padding(.top, 8)
+                    .padding(.horizontal, 24)
                 }
 
                 // Current clock task
@@ -57,12 +98,12 @@ struct ClockGridView: View {
                         viewModel: viewModel,
                         onTaskSolved: handleTaskSolved
                     )
-                    .padding(.horizontal, 24)
+                    .padding(.horizontal, 20)
                     .transition(.asymmetric(
                         insertion: .move(edge: .trailing).combined(with: .opacity),
                         removal: .move(edge: .leading).combined(with: .opacity)
                     ))
-                    .id(currentTaskIndex) // forces SwiftUI to recreate view on index change
+                    .id(currentTaskIndex)
                 }
 
                 Spacer()
@@ -74,7 +115,7 @@ struct ClockGridView: View {
                     .zIndex(1)
             }
         }
-        .navigationTitle("Ustaw poprawny czas ⏰")
+        .navigationTitle("Set the Correct Time")
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {
             viewModel.resetGame()
@@ -82,16 +123,12 @@ struct ClockGridView: View {
             showCoins = false
             startTimer()
         }
-        .onDisappear {
-            stopTimer()
-        }
-        .animation(.spring(), value: showCoins)
-        .animation(.easeInOut(duration: 0.35), value: currentTaskIndex)
+        .onDisappear { stopTimer() }
+        .animation(.spring(response: 0.4, dampingFraction: 0.75), value: showCoins)
+        .animation(.easeInOut(duration: 0.3), value: currentTaskIndex)
         .alert("Congratulations!".localized + "\n" + elapsedTime.formattedTime, isPresented: $shouldShowNameAlert) {
             TextField("Nickname".localized, text: $userName)
-            Button("Save".localized) {
-                saveResultAndShowVictory()
-            }
+            Button("Save".localized) { saveResultAndShowVictory() }
             Button("Skip".localized, role: .cancel) { }
         } message: {
             Text("Enter your nickname to save the result".localized)
@@ -105,10 +142,12 @@ struct ClockGridView: View {
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Text(elapsedTime.formattedTimeWithMilliseconds)
-                    .font(.system(size: UIDevice.current.userInterfaceIdiom == .pad ? 20 : 16,
-                                  weight: .bold,
-                                  design: .monospaced))
-                    .foregroundColor(.blue.opacity(viewModel.settings.isTimerOn ? 1 : 0))
+                    .font(DS.mono(UIDevice.current.userInterfaceIdiom == .pad ? 18 : 14))
+                    .foregroundColor(viewModel.settings.isTimerOn ? DS.accent : .clear)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 4)
+                    .background(viewModel.settings.isTimerOn ? DS.accentSoft : .clear)
+                    .clipShape(Capsule())
             }
         }
     }
@@ -116,15 +155,12 @@ struct ClockGridView: View {
     // MARK: - Task Solved Handler
     private func handleTaskSolved() {
         let nextIndex = currentTaskIndex + 1
-
         if nextIndex < viewModel.tasks.count {
-            // Brief delay so the ✅ "Świetnie!" is visible before advancing
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.9) {
                 currentTaskIndex = nextIndex
             }
         } else {
-            // All tasks done
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.9) {
                 showCoins = true
             }
         }
@@ -135,17 +171,11 @@ struct ClockGridView: View {
         guard startTime == nil else { return }
         startTime = Date()
         timer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { _ in
-            if let startTime = startTime {
-                elapsedTime = Date().timeIntervalSince(startTime)
-            }
+            if let s = startTime { elapsedTime = Date().timeIntervalSince(s) }
         }
         RunLoop.current.add(timer!, forMode: .common)
     }
-
-    private func stopTimer() {
-        timer?.invalidate()
-        timer = nil
-    }
+    private func stopTimer() { timer?.invalidate(); timer = nil }
 
     // MARK: - Save Result
     private func saveResultAndShowVictory() {
@@ -160,11 +190,46 @@ struct ClockGridView: View {
     }
 }
 
+// MARK: - Progress Header
+struct ProgressHeaderView: View {
+    let current: Int
+    let total: Int
+
+    var progress: CGFloat { CGFloat(current) / CGFloat(total) }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Text("Task \(current) of \(total)")
+                    .font(DS.display(14))
+                    .foregroundColor(DS.textSecondary)
+                Spacer()
+                Text("\(Int(progress * 100))%")
+                    .font(DS.mono(13))
+                    .foregroundColor(DS.accent)
+            }
+
+            GeometryReader { geo in
+                ZStack(alignment: .leading) {
+                    RoundedRectangle(cornerRadius: 3)
+                        .fill(DS.border)
+                        .frame(height: 5)
+                    RoundedRectangle(cornerRadius: 3)
+                        .fill(DS.accent)
+                        .frame(width: geo.size.width * progress, height: 5)
+                        .animation(.spring(response: 0.5, dampingFraction: 0.7), value: progress)
+                }
+            }
+            .frame(height: 5)
+        }
+    }
+}
+
 // MARK: - Single Clock Task View
 struct ClockTaskView: View {
     let task: ClockTask
     @ObservedObject var viewModel: ClockGameViewModel
-    var onTaskSolved: () -> Void  // Closure to notify parent when solved
+    var onTaskSolved: () -> Void
 
     @State private var hourAngle: Double = 0
     @State private var minuteAngle: Double = 0
@@ -172,18 +237,23 @@ struct ClockTaskView: View {
     @State private var audioPlayer: AVAudioPlayer?
 
     var body: some View {
-        VStack(spacing: 12) {
-            Text(formatted(time: task.date))
-                .font(.system(size: 24, weight: .bold, design: .rounded))
-                .foregroundStyle(
-                    LinearGradient(colors: [.blue, .purple], startPoint: .leading, endPoint: .trailing)
-                )
-                .padding(.horizontal, 20)
-                .padding(.vertical, 8)
-                .background(Color.white)
-                .cornerRadius(12)
-                .shadow(color: .black.opacity(0.1), radius: 4, y: 2)
+        VStack(spacing: 20) {
 
+            // Target time chip
+            HStack(spacing: 8) {
+                Image(systemName: "clock")
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundColor(DS.accent)
+                Text(formatted(time: task.date))
+                    .font(DS.mono(28))
+                    .foregroundColor(DS.textPrimary)
+            }
+            .padding(.horizontal, 20)
+            .padding(.vertical, 10)
+            .background(DS.accentSoft)
+            .clipShape(Capsule())
+
+            // Clock face
             AnalogClockView(
                 hourAngle: $hourAngle,
                 minuteAngle: $minuteAngle,
@@ -193,40 +263,54 @@ struct ClockTaskView: View {
             )
             .frame(maxWidth: .infinity)
             .aspectRatio(1, contentMode: .fit)
-            
-            if isCorrect {
-                HStack(spacing: 8) {
-                    Image(systemName: "checkmark.circle.fill")
-                        .font(.system(size: 24))
-                    Text("Świetnie!")
-                        .font(.system(size: 20, weight: .bold, design: .rounded))
+            .padding(.horizontal, 4)
+
+            // Instruction / success state
+            Group {
+                if isCorrect {
+                    HStack(spacing: 6) {
+                        Image(systemName: "checkmark.circle.fill")
+                            .foregroundColor(DS.success)
+                        Text("Correct")
+                            .font(DS.display(16))
+                            .foregroundColor(DS.success)
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 8)
+                    .background(DS.successSoft)
+                    .clipShape(Capsule())
+                    .transition(.scale(scale: 0.8).combined(with: .opacity))
+                } else {
+                    Text("Drag the hands to match the time")
+                        .font(DS.body(14))
+                        .foregroundColor(DS.textSecondary)
+                        .transition(.opacity)
                 }
-                .foregroundColor(.green)
-                .transition(.scale.combined(with: .opacity))
             }
+            .animation(.spring(response: 0.35, dampingFraction: 0.65), value: isCorrect)
         }
-        .padding(16)
-        .background(Color.white)
-        .cornerRadius(20)
-        .shadow(color: isCorrect ? .green.opacity(0.3) : .black.opacity(0.1), radius: 12, y: 6)
+        .padding(24)
+        .background(DS.surface)
+        .cornerRadius(DS.radiusCard)
+        .shadow(color: isCorrect
+                ? DS.success.opacity(0.15)
+                : Color.black.opacity(0.06),
+                radius: isCorrect ? 20 : 10, y: 4)
+        .animation(.easeInOut(duration: 0.3), value: isCorrect)
     }
 
     private func check() {
         guard !isCorrect else { return }
-
         let components = Calendar.current.dateComponents([.hour, .minute], from: task.date)
-        let targetHourAngle = (Double(components.hour! % 12) * 30) + (Double(components.minute!) / 60 * 30)
+        let targetHourAngle   = (Double(components.hour! % 12) * 30) + (Double(components.minute!) / 60 * 30)
         let targetMinuteAngle = Double(components.minute!) * 6
-
         let tolerance = viewModel.toleranceForDifficulty()
-
         let wasCorrect = isCorrect
         isCorrect = angularDifference(hourAngle, targetHourAngle) < tolerance.hour &&
                     angularDifference(minuteAngle, targetMinuteAngle) < tolerance.minute
-
         if isCorrect && !wasCorrect {
             playSuccessSound()
-            viewModel.markTaskSolved(task)   // 👈 mark in ViewModel
+            viewModel.markTaskSolved(task)
             onTaskSolved()
         }
     }
@@ -237,254 +321,315 @@ struct ClockTaskView: View {
     }
 
     private func formatted(time: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = viewModel.settings.is24HourClock ? "HH:mm" : "hh:mm"
-        return formatter.string(from: task.date)
+        let f = DateFormatter()
+        f.dateFormat = viewModel.settings.is24HourClock ? "HH:mm" : "hh:mm"
+        return f.string(from: time)
     }
 
     private func playSuccessSound() {
-        guard let soundURL = Bundle.main.url(forResource: "stars", withExtension: "m4a") else { return }
-        do {
-            audioPlayer = try AVAudioPlayer(contentsOf: soundURL)
-            audioPlayer?.play()
-        } catch {
-            print("Failed to play sound: \(error)")
-        }
+        guard let url = Bundle.main.url(forResource: "stars", withExtension: "m4a") else { return }
+        do { audioPlayer = try AVAudioPlayer(contentsOf: url); audioPlayer?.play() }
+        catch { print("Sound error: \(error)") }
     }
 }
 
-// MARK: - Analog Clock
+// MARK: - Analog Clock View
 struct AnalogClockView: View {
     @Binding var hourAngle: Double
     @Binding var minuteAngle: Double
     var isCorrect: Bool
     var isLocked: Bool
-    
     var onDragEnded: (() -> Void)?
-    
-    @State private var draggingHand: DraggingHand? = nil
-    
-    enum DraggingHand {
-        case hour, minute
-    }
+
+    @State private var draggingHand: DraggingHand?
+
+    enum DraggingHand { case hour, minute }
 
     var body: some View {
         GeometryReader { geo in
-            let size = min(geo.size.width, geo.size.height)
+            let size   = min(geo.size.width, geo.size.height)
             let center = size / 2
 
             ZStack {
-                // Zewnętrzny gradient ring
+                // ── Layer 1: Outermost decorative shadow ring ──────────────
+                Circle()
+                    .fill(
+                        RadialGradient(
+                            colors: [
+                                Color(hex: "#D1D5DB"),
+                                Color(hex: "#E9EBF0"),
+                                Color(hex: "#F3F4F6")
+                            ],
+                            center: .init(x: 0.38, y: 0.32),
+                            startRadius: size * 0.02,
+                            endRadius: size * 0.54
+                        )
+                    )
+                    .shadow(color: Color.black.opacity(0.22), radius: 14, x: 4, y: 6)
+                    .shadow(color: Color.white.opacity(0.9), radius: 6, x: -3, y: -3)
+
+                // ── Layer 2: Metallic bezel ring ───────────────────────────
                 Circle()
                     .stroke(
-                        LinearGradient(
-                            colors: isCorrect ? [.green, .green.opacity(0.6)] : [.blue.opacity(0.3), .purple.opacity(0.3)],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
+                        AngularGradient(
+                            colors: [
+                                Color(hex: "#C8CDD6"),
+                                Color(hex: "#F0F2F5"),
+                                Color(hex: "#A8AEBB"),
+                                Color(hex: "#ECEEF2"),
+                                Color(hex: "#B8BDC8"),
+                                Color(hex: "#F0F2F5"),
+                                Color(hex: "#C8CDD6")
+                            ],
+                            center: .center
                         ),
-                        lineWidth: 8
+                        lineWidth: size * 0.045
                     )
-                    .shadow(color: isCorrect ? .green.opacity(0.3) : .blue.opacity(0.2), radius: 8, y: 4)
-                
-                // Białe tło
+                    .padding(size * 0.012)
+
+                // ── Layer 3: Inner bezel accent line ──────────────────────
                 Circle()
-                    .fill(Color.white)
-                    .padding(8)
-                    .shadow(color: .black.opacity(0.1), radius: 4, y: 2)
+                    .stroke(
+                        isCorrect
+                        ? LinearGradient(colors: [DS.success, DS.success.opacity(0.5)],
+                                         startPoint: .topLeading, endPoint: .bottomTrailing)
+                        : LinearGradient(colors: [Color(hex: "#9BA3AF"), Color(hex: "#CBD0D8")],
+                                         startPoint: .topLeading, endPoint: .bottomTrailing),
+                        lineWidth: 1.5
+                    )
+                    .padding(size * 0.048)
+                    .shadow(color: isCorrect ? DS.success.opacity(0.4) : .clear, radius: 6)
 
-                // Kolorowe znaczniki dla ważnych godzin
-                ForEach(1...12, id: \.self) { hour in
-                    Circle()
-                        .fill(hourColor(for: hour))
-                        .frame(width: 8, height: 8)
-                        .offset(y: -center + 20)
-                        .rotationEffect(.degrees(Double(hour) * 30))
-                }
-                
-                // Cienkie kreski co minutę
+                // ── Layer 4: Clock face ────────────────────────────────────
+                Circle()
+                    .fill(
+                        RadialGradient(
+                            colors: [Color.white, Color(hex: "#F8F9FB")],
+                            center: .init(x: 0.45, y: 0.4),
+                            startRadius: 0,
+                            endRadius: size * 0.48
+                        )
+                    )
+                    .padding(size * 0.065)
+
+                // ── Layer 5: Tick marks ────────────────────────────────────
                 ForEach(0..<60) { tick in
-                    if tick % 5 != 0 {
-                        Rectangle()
-                            .fill(Color.gray.opacity(0.3))
-                            .frame(width: 1, height: 4)
-                            .offset(y: -center + 14)
-                            .rotationEffect(.degrees(Double(tick) * 6))
-                    }
+                    let isHour      = tick % 5 == 0
+                    let isQuarter   = tick % 15 == 0
+                    let tickW: CGFloat  = isQuarter ? 3   : isHour ? 2   : 1
+                    let tickH: CGFloat  = isQuarter ? 18  : isHour ? 13  : 6
+                    let tickOpacity     = isQuarter ? 1.0 : isHour ? 0.8 : 0.35
+                    let inset: CGFloat  = size * 0.065 + size * 0.028
+
+                    Rectangle()
+                        .fill(
+                            isQuarter
+                            ? Color(hex: "#1A1A2E")
+                            : isHour
+                                ? Color(hex: "#374151")
+                                : Color(hex: "#9CA3AF")
+                        )
+                        .opacity(tickOpacity)
+                        .frame(width: tickW, height: tickH)
+                        .cornerRadius(tickW / 2)
+                        .offset(y: -(center - inset - tickH / 2))
+                        .rotationEffect(.degrees(Double(tick) * 6))
                 }
 
-                // Cyfry
-                ForEach(1...12, id: \.self) { number in
-                    Text("\(number)")
-                        .font(.system(size: size * 0.08, weight: .bold, design: .rounded))
-                        .foregroundColor(hourColor(for: number))
-                        .position(position(for: Double(number) * 30, size: size))
+                // ── Layer 6: Hour numerals ─────────────────────────────────
+                ForEach(1...12, id: \.self) { n in
+                    let isQuarter = n % 3 == 0
+                    Text("\(n)")
+                        .font(.system(
+                            size: isQuarter ? size * 0.082 : size * 0.068,
+                            weight: isQuarter ? .bold : .semibold,
+                            design: .rounded
+                        ))
+                        .foregroundColor(isQuarter ? Color(hex: "#111827") : Color(hex: "#374151"))
+                        .position(numberPosition(for: Double(n) * 30, size: size))
                 }
 
-                // Wskazówka godzinowa - krótka i gruba
-                FancyClockHand(
-                    length: center * 0.45,
-                    width: 10,
+                // ── Layer 7: Subtle inner shadow ring on face ─────────────
+                Circle()
+                    .stroke(Color.black.opacity(0.04), lineWidth: 6)
+                    .padding(size * 0.065)
+                    .blur(radius: 4)
+
+                // ── Layer 8: Hour hand ─────────────────────────────────────
+                TaperedClockHand(
+                    length: center * 0.50,
+                    tailLength: center * 0.12,
+                    tipWidth: 3.5,
+                    baseWidth: 10,
                     angle: hourAngle,
-                    color: draggingHand == .hour ? .orange : .blue,
+                    fillColor: draggingHand == .hour ? DS.handDragging : Color(hex: "#1A1A2E"),
                     isDragging: draggingHand == .hour
                 )
-                
-                // Wskazówka minutowa - długa i cienka
-                FancyClockHand(
-                    length: center * 0.7,
-                    width: 6,
+
+                // ── Layer 9: Minute hand ───────────────────────────────────
+                TaperedClockHand(
+                    length: center * 0.70,
+                    tailLength: center * 0.14,
+                    tipWidth: 2,
+                    baseWidth: 7,
                     angle: minuteAngle,
-                    color: draggingHand == .minute ? .orange : .red,
+                    fillColor: draggingHand == .minute ? DS.handDragging : DS.accent,
                     isDragging: draggingHand == .minute
                 )
 
-                // Środkowy punkt
-                ZStack {
-                    Circle()
-                        .fill(Color.yellow)
-                        .frame(width: 20, height: 20)
-                        .shadow(color: .orange.opacity(0.5), radius: 4, y: 2)
-                    
-                    Circle()
-                        .fill(Color.white)
-                        .frame(width: 8, height: 8)
-                }
+                // ── Layer 10: Center jewel ─────────────────────────────────
+                CenterJewel(size: size * 0.075)
             }
             .gesture(
                 DragGesture()
                     .onChanged { value in
-                        // Jeśli zegar zablokowany, ignoruj gesty
-                        if isLocked {
-                            return
-                        }
-                        
-                        let centerPoint = CGPoint(x: size / 2, y: size / 2)
-                        
+                        guard !isLocked else { return }
+                        let cp = CGPoint(x: size / 2, y: size / 2)
                         if draggingHand == nil {
-                            draggingHand = determineClosestHand(
-                                touchPoint: value.startLocation,
-                                center: centerPoint,
-                                hourAngle: hourAngle,
-                                minuteAngle: minuteAngle,
-                                hourLength: center * 0.45,
-                                minuteLength: center * 0.7
+                            draggingHand = closestHand(
+                                touch: value.startLocation, center: cp,
+                                hourLen: center * 0.50, minuteLen: center * 0.70
                             )
                         }
-                        
-                        let newAngle = angleFromPoint(value.location, center: centerPoint)
-                        
-                        if draggingHand == .hour {
-                            hourAngle = newAngle
-                        } else if draggingHand == .minute {
-                            minuteAngle = newAngle
-                        }
+                        let angle = angleFrom(value.location, center: cp)
+                        if draggingHand == .hour   { hourAngle   = angle }
+                        if draggingHand == .minute { minuteAngle = angle }
                     }
-                    .onEnded { _ in
-                        draggingHand = nil
-                        onDragEnded?()
-                    }
+                    .onEnded { _ in draggingHand = nil; onDragEnded?() }
             )
         }
     }
-    
-    private func hourColor(for hour: Int) -> Color {
-        let colors: [Color] = [.red, .orange, .yellow, .green, .blue, .purple]
-        return colors[(hour - 1) % colors.count]
+
+    private func numberPosition(for angle: Double, size: CGFloat) -> CGPoint {
+        let r = size * 0.355
+        let rad = (angle - 90) * .pi / 180
+        return CGPoint(x: size/2 + r * CGFloat(cos(rad)),
+                       y: size/2 + r * CGFloat(sin(rad)))
     }
 
-    private func position(for angle: Double, size: CGFloat) -> CGPoint {
-        let radius = size * 0.38
-        let radians = (angle - 90) * .pi / 180
+    private func angleFrom(_ point: CGPoint, center: CGPoint) -> Double {
+        let v = CGVector(dx: point.x - center.x, dy: point.y - center.y)
+        let deg = atan2(v.dy, v.dx) * 180 / .pi + 90
+        return deg < 0 ? deg + 360 : deg
+    }
 
-        return CGPoint(
-            x: size / 2 + radius * CGFloat(Foundation.cos(radians)),
-            y: size / 2 + radius * CGFloat(Foundation.sin(radians))
-        )
-    }
-    
-    private func angleFromPoint(_ point: CGPoint, center: CGPoint) -> Double {
-        let vector = CGVector(dx: point.x - center.x, dy: point.y - center.y)
-        let radians = atan2(vector.dy, vector.dx)
-        let degrees = radians * 180 / .pi + 90
-        return degrees < 0 ? degrees + 360 : degrees
-    }
-    
-    private func determineClosestHand(
-        touchPoint: CGPoint,
-        center: CGPoint,
-        hourAngle: Double,
-        minuteAngle: Double,
-        hourLength: CGFloat,
-        minuteLength: CGFloat
-    ) -> DraggingHand {
-        let hourTip = tipPosition(angle: hourAngle, length: hourLength, center: center)
-        let distanceToHour = distance(from: touchPoint, to: hourTip)
-        
-        let minuteTip = tipPosition(angle: minuteAngle, length: minuteLength, center: center)
-        let distanceToMinute = distance(from: touchPoint, to: minuteTip)
-        
-        return distanceToHour < distanceToMinute ? .hour : .minute
-    }
-    
-    private func tipPosition(angle: Double, length: CGFloat, center: CGPoint) -> CGPoint {
-        let radians = (angle - 90) * .pi / 180
-        return CGPoint(
-            x: center.x + length * CGFloat(cos(radians)),
-            y: center.y + length * CGFloat(sin(radians))
-        )
-    }
-    
-    private func distance(from p1: CGPoint, to p2: CGPoint) -> CGFloat {
-        let dx = p1.x - p2.x
-        let dy = p1.y - p2.y
-        return sqrt(dx * dx + dy * dy)
+    private func closestHand(touch: CGPoint, center: CGPoint, hourLen: CGFloat, minuteLen: CGFloat) -> DraggingHand {
+        func tip(_ angle: Double, _ len: CGFloat) -> CGPoint {
+            let r = (angle - 90) * .pi / 180
+            return CGPoint(x: center.x + len * CGFloat(cos(r)),
+                           y: center.y + len * CGFloat(sin(r)))
+        }
+        func dist(_ a: CGPoint, _ b: CGPoint) -> CGFloat { hypot(a.x - b.x, a.y - b.y) }
+        return dist(touch, tip(hourAngle, hourLen)) < dist(touch, tip(minuteAngle, minuteLen)) ? .hour : .minute
     }
 }
 
-// MARK: - Fancy Clock Hand
-struct FancyClockHand: View {
-    let length: CGFloat
-    let width: CGFloat
+// MARK: - Tapered Clock Hand (watchmaker-style)
+struct TaperedClockHand: View {
+    let length: CGFloat       // forward tip length from center
+    let tailLength: CGFloat   // counter-weight tail behind center
+    let tipWidth: CGFloat
+    let baseWidth: CGFloat
     let angle: Double
-    let color: Color
+    let fillColor: Color
     let isDragging: Bool
 
     var body: some View {
-        ZStack {
-            // Cień wskazówki
-            RoundedRectangle(cornerRadius: width / 2)
-                .fill(color.opacity(0.3))
-                .frame(width: width + 2, height: length)
-                .offset(y: -length / 2)
-                .blur(radius: 3)
-            
-            // Główna wskazówka
-            RoundedRectangle(cornerRadius: width / 2)
-                .fill(
-                    LinearGradient(
-                        colors: [color, color.opacity(0.7)],
-                        startPoint: .top,
-                        endPoint: .bottom
-                    )
-                )
-                .frame(width: width, height: length)
-                .offset(y: -length / 2)
-                .shadow(color: color.opacity(0.5), radius: isDragging ? 8 : 4, y: 2)
-            
-            // Strzałka na końcu
-            Triangle()
-                .fill(color)
-                .frame(width: width * 2, height: width * 2)
-                .offset(y: -length + width)
-                .shadow(color: color.opacity(0.5), radius: isDragging ? 6 : 3, y: 1)
+        Canvas { ctx, size in
+            let cx = size.width / 2
+            let cy = size.height / 2
+
+            // Build the hand shape: tapered polygon
+            // Tip point (forward)
+            let tip = CGPoint(x: cx, y: cy - length)
+            // Base points (at center, widest)
+            let baseL = CGPoint(x: cx - baseWidth / 2, y: cy)
+            let baseR = CGPoint(x: cx + baseWidth / 2, y: cy)
+            // Tail point (counter-weight, narrower)
+            let tailL = CGPoint(x: cx - tipWidth / 2, y: cy + tailLength)
+            let tailR = CGPoint(x: cx + tipWidth / 2, y: cy + tailLength)
+
+            var path = Path()
+            path.move(to: tip)
+            path.addLine(to: baseR)
+            path.addLine(to: tailR)
+            path.addLine(to: tailL)
+            path.addLine(to: baseL)
+            path.closeSubpath()
+
+            // Main fill
+            ctx.fill(path, with: .color(fillColor))
+
+            // Highlight sheen on the left edge
+            var sheen = Path()
+            sheen.move(to: tip)
+            sheen.addLine(to: CGPoint(x: cx - baseWidth * 0.3, y: cy))
+            sheen.addLine(to: CGPoint(x: cx - tipWidth * 0.2, y: cy + tailLength * 0.6))
+            ctx.fill(sheen, with: .color(.white.opacity(0.25)))
+
+            // Edge stroke for definition
+            ctx.stroke(path, with: .color(fillColor.opacity(0.6)), lineWidth: 0.5)
         }
+        .shadow(color: fillColor.opacity(isDragging ? 0.5 : 0.25),
+                radius: isDragging ? 10 : 5, x: 1, y: 2)
         .rotationEffect(.degrees(angle))
-        .scaleEffect(isDragging ? 1.1 : 1.0)
-        .animation(.spring(response: 0.3, dampingFraction: 0.6), value: isDragging)
+        .scaleEffect(isDragging ? 1.06 : 1.0)
+        .animation(.spring(response: 0.25, dampingFraction: 0.6), value: isDragging)
+        .animation(.spring(response: 0.2, dampingFraction: 0.7), value: fillColor)
     }
 }
 
-// MARK: - Triangle Shape
+// MARK: - Center Jewel
+struct CenterJewel: View {
+    let size: CGFloat
+
+    var body: some View {
+        ZStack {
+            // Outer shadow disc
+            Circle()
+                .fill(Color.black.opacity(0.18))
+                .frame(width: size + 4, height: size + 4)
+                .blur(radius: 3)
+                .offset(y: 1.5)
+
+            // Main cap – radial metallic gradient
+            Circle()
+                .fill(
+                    RadialGradient(
+                        colors: [
+                            Color(hex: "#E8EAED"),
+                            Color(hex: "#9BA3AF"),
+                            Color(hex: "#6B7280")
+                        ],
+                        center: .init(x: 0.35, y: 0.3),
+                        startRadius: 0,
+                        endRadius: size * 0.6
+                    )
+                )
+                .frame(width: size, height: size)
+                .shadow(color: Color.black.opacity(0.3), radius: 2, y: 1)
+
+            // Specular highlight
+            Circle()
+                .fill(
+                    RadialGradient(
+                        colors: [Color.white.opacity(0.85), Color.white.opacity(0)],
+                        center: .init(x: 0.3, y: 0.25),
+                        startRadius: 0,
+                        endRadius: size * 0.35
+                    )
+                )
+                .frame(width: size, height: size)
+
+            // Inner pinion dot
+            Circle()
+                .fill(Color(hex: "#374151"))
+                .frame(width: size * 0.22, height: size * 0.22)
+        }
+    }
+}
+
+// MARK: - Triangle Shape (kept for compatibility)
 struct Triangle: Shape {
     func path(in rect: CGRect) -> Path {
         var path = Path()
