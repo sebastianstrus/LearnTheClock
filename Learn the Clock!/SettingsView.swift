@@ -259,7 +259,7 @@ struct StatisticsView: View {
     private func columnHeaders() -> some View {
         HStack(spacing: 4) {
             // Name header
-            Text("Nickname".localized)
+            Text("Name".localized)
                 .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
                 .font(Font.system(size: 13).bold())
                 .foregroundColor(.primary)
