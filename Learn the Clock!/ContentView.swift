@@ -239,18 +239,63 @@ struct ClockTaskView: View {
         VStack(spacing: 20) {
 
             // Target time chip
-            HStack(spacing: 8) {
-                Image(systemName: "clock")
-                    .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(DS.accent)
-                Text(formatted(time: task.date))
-                    .font(DS.mono(28))
-                    .foregroundColor(DS.textPrimary)
+            // Target time chip — refined glass card
+            ZStack {
+                // Glassy background
+                RoundedRectangle(cornerRadius: 18)
+                    .fill(
+                        LinearGradient(
+                            colors: [
+                                DS.accentSoft,
+                                DS.accent.opacity(0.06)
+                            ],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+
+                // Subtle inner border
+                RoundedRectangle(cornerRadius: 18)
+                    .strokeBorder(
+                        LinearGradient(
+                            colors: [
+                                DS.accent.opacity(0.45),
+                                DS.accent.opacity(0.10)
+                            ],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
+                        lineWidth: 1
+                    )
+
+                HStack(spacing: 10) {
+                    // Icon badge
+                    ZStack {
+                        Circle()
+                            .fill(DS.accent.opacity(0.15))
+                            .frame(width: 32, height: 32)
+                        Image(systemName: "clock.fill")
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundColor(DS.accent)
+                    }
+
+                    // Divider
+                    Rectangle()
+                        .fill(DS.accent.opacity(0.2))
+                        .frame(width: 1, height: 28)
+
+                    // Time
+                    Text(formatted(time: task.date))
+                        .font(DS.mono(30))
+                        .foregroundColor(DS.textPrimary)
+                        .tracking(1.5)
+                }
+                .padding(.horizontal, 18)
+                .padding(.vertical, 10)
             }
-            .padding(.horizontal, 20)
-            .padding(.vertical, 10)
-            .background(DS.accentSoft)
-            .clipShape(Capsule())
+            .fixedSize()
+            .shadow(color: DS.accent.opacity(0.18), radius: 12, x: 0, y: 4)
+            .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
 
             // Clock face
             AnalogClockView(
@@ -280,10 +325,15 @@ struct ClockTaskView: View {
                     .clipShape(Capsule())
                     .transition(.scale(scale: 0.8).combined(with: .opacity))
                 } else {
-                    Text("Drag the hands to match the time")
-                        .font(DS.body(14))
+                    Label("Drag the hands to match the time", systemImage: "hand.draw")
+                        .font(DS.body(16))
                         .foregroundColor(DS.textSecondary)
                         .transition(.opacity)
+
+//                    Text("Drag the hands to match the time")
+//                        .font(DS.body(14))
+//                        .foregroundColor(DS.textSecondary)
+//                        .transition(.opacity)
                 }
             }
             .animation(.spring(response: 0.35, dampingFraction: 0.65), value: isCorrect)
@@ -364,7 +414,9 @@ struct AnalogClockView: View {
                             endRadius: size * 0.54
                         )
                     )
-                    .shadow(color: Color.black.opacity(0.22), radius: 14, x: 4, y: 6)
+                    .shadow(color: Color.black.opacity(0.28), radius: 24, x: 6, y: 10)
+                    .shadow(color: Color.black.opacity(0.12), radius: 8, x: 2, y: 4)
+                    .shadow(color: Color(hex: "#4F6EF7").opacity(0.10), radius: 30, x: 0, y: 8)
                     .shadow(color: Color.white.opacity(0.9), radius: 6, x: -3, y: -3)
 
                 // ── Layer 2: Metallic bezel ring ───────────────────────────
