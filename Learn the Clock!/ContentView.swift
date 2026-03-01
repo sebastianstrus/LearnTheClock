@@ -94,6 +94,7 @@ struct ClockGridView: View {
                 if !viewModel.tasks.isEmpty {
                     ProgressHeaderView(
                         current: currentTaskIndex + 1,
+                        completed: currentTaskIndex,
                         total: viewModel.tasks.count
                     )
                     .padding(.top, 8)
@@ -207,9 +208,10 @@ struct ClockGridView: View {
 // MARK: - Progress Header
 struct ProgressHeaderView: View {
     let current: Int
+    let completed: Int
     let total: Int
 
-    var progress: CGFloat { CGFloat(current) / CGFloat(total) }
+    var progress: CGFloat { CGFloat(completed) / CGFloat(total) }
 
     var body: some View {
         VStack(spacing: 12) {
