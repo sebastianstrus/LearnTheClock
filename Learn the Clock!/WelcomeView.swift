@@ -88,12 +88,10 @@ struct WelcomeView: View {
             .frame(maxHeight: .infinity)
 
             .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
+                ToolbarItem(placement: .primaryAction) {
                     NavigationLink(destination: SettingsView()) {
                         Image(systemName: "gear")
-                            .font(.title2)
                             .foregroundColor(.white)
-                            .padding()
                     }
                 }
                 
