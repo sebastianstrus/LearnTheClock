@@ -115,7 +115,7 @@ struct ClockGridView: View {
                     .zIndex(1)
             }
         }
-        .navigationTitle("Set the Correct Time")
+        .navigationTitle("Set the Time")
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {
             viewModel.resetGame()
@@ -140,14 +140,13 @@ struct ClockGridView: View {
             }
         }
         .toolbar {
-            ToolbarItem(placement: .navigationBarTrailing) {
-                Text(elapsedTime.formattedTimeWithMilliseconds)
-                    .font(DS.mono(UIDevice.current.userInterfaceIdiom == .pad ? 18 : 14))
-                    .foregroundColor(viewModel.settings.isTimerOn ? DS.accent : .clear)
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 4)
-                    .background(viewModel.settings.isTimerOn ? DS.accentSoft : .clear)
-                    .clipShape(Capsule())
+            if viewModel.settings.isTimerOn {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Text(elapsedTime.formattedTimeWithMilliseconds)
+                        .font(DS.mono(UIDevice.current.userInterfaceIdiom == .pad ? 18 : 14))
+                        .foregroundColor(viewModel.settings.isTimerOn ? DS.accent : .clear)
+                        .padding(.horizontal, 10)
+                }
             }
         }
     }
