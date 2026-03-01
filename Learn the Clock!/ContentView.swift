@@ -78,7 +78,16 @@ struct ClockGridView: View {
 
     var body: some View {
         ZStack {
-            DS.background.ignoresSafeArea()
+            LinearGradient(
+                colors: [
+                    Color(red: 0.72, green: 0.88, blue: 0.95),  // soft sky blue
+                    Color(red: 0.55, green: 0.78, blue: 0.90),  // light ocean
+                    Color(red: 0.40, green: 0.68, blue: 0.82)   // gentle teal-blue
+                ],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            .ignoresSafeArea()
 
             VStack(spacing: 28) {
                 // Progress indicator
@@ -115,7 +124,13 @@ struct ClockGridView: View {
                     .zIndex(1)
             }
         }
-        .navigationTitle("Set the Time")
+        .toolbar {
+            ToolbarItem(placement: .principal) {
+                Text("Set the Time")
+                    .bold()
+                    .foregroundColor(.black)
+            }
+        }
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {
             viewModel.resetGame()
@@ -649,7 +664,7 @@ struct AnalogClockView: View {
 
     private func numberPosition(for angle: Double, size: CGFloat) -> CGPoint {
         // 0.315 keeps numbers inside the longest (20 pt) tick mark at any clock size
-        let r = size * 0.335
+        let r = size * 0.330
         let rad = (angle - 90) * .pi / 180
         return CGPoint(x: size/2 + r * CGFloat(cos(rad)),
                        y: size/2 + r * CGFloat(sin(rad)))
