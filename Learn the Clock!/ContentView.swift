@@ -133,8 +133,8 @@ struct ClockGridView: View {
         } message: {
             Text("Enter your nickname to save the result".localized)
         }
-        .onChange(of: showCoins) { completed in
-            if completed {
+        .onChange(of: showCoins) {
+            if showCoins {
                 stopTimer()
                 shouldShowNameAlert = true
             }

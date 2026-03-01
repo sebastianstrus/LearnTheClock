@@ -148,7 +148,7 @@ class SettingsManager: ObservableObject {
     
     private init() {
         if let appleLanguages = userDefaults.array(forKey: UserDefaultsKeys.primaryLanguage.rawValue),
-           let code = appleLanguages.first as? String,
+           let _ = appleLanguages.first as? String,
            let appLanguage = Language(localeIdentifier: appleLanguages.first! as! String) {
             primaryLanguage = appLanguage
         } else {

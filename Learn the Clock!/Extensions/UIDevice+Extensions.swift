@@ -162,24 +162,26 @@ extension UIDevice {
 }
 
 
-extension UIDevice {
-    // ... (keep your existing modelName and modelIdentifier code)
+extension UIView {
 
     /// Returns screen size in points (e.g., "390×844 pt")
-    var screenSizePoints: String {
-        let bounds = UIScreen.main.bounds
+    var screenSizePoints: String? {
+        guard let screen = window?.windowScene?.screen else { return nil }
+        let bounds = screen.bounds
         return "\(Int(bounds.width))×\(Int(bounds.height)) pt"
     }
 
     /// Returns screen size in pixels (e.g., "1170×2532 px")
-    var screenSizePixels: String {
-        let bounds = UIScreen.main.nativeBounds
+    var screenSizePixels: String? {
+        guard let screen = window?.windowScene?.screen else { return nil }
+        let bounds = screen.nativeBounds
         return "\(Int(bounds.width))×\(Int(bounds.height)) px"
     }
 
-    /// Returns screen scale (e.g., "3.0x" for Retina displays)
-    var screenScale: String {
-        return String(format: "%.1fx", UIScreen.main.scale)
+    /// Returns screen scale (e.g., "3.0x")
+    var screenScale: String? {
+        guard let screen = window?.windowScene?.screen else { return nil }
+        return String(format: "%.1fx", screen.scale)
     }
 }
 
