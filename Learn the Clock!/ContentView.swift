@@ -647,46 +647,40 @@ struct Triangle: Shape {
 }
 
 
-
-
-import SwiftUI
-import MediaPlayer
-
 struct FallingCoinsView: View {
     @State private var coins: [Coin] = []
     @State private var timer: Timer?
-    @State private var audioPlayer: AVAudioPlayer?
-
-    let screenWidth = UIScreen.main.bounds.width
-    let screenHeight = UIScreen.main.bounds.height
-
+    
     var body: some View {
-        ZStack {
-            Color.black.opacity(0.7).edgesIgnoringSafeArea(.all)
-            
-            ForEach(coins) { coin in
-                Image("coin")
-                    .resizable()
-                    .frame(width: coin.size, height: coin.size)
-                    .rotationEffect(.degrees(coin.rotation))
-                    .position(x: coin.x, y: coin.y)
-                    .onAppear {
-                        animateCoinDrop(coin)
-                    }
+        GeometryReader { geometry in
+            ZStack {
+                Color.black.opacity(0.7)
+                    .ignoresSafeArea()
+                
+                ForEach(coins) { coin in
+                    Image("coin")
+                        .resizable()
+                        .frame(width: coin.size, height: coin.size)
+                        .rotationEffect(.degrees(coin.rotation))
+                        .position(x: coin.x, y: coin.y)
+                        .onAppear {
+                            animateCoinDrop(coin, screenHeight: geometry.size.height)
+                        }
+                }
+            }
+            .onAppear {
+                startCoinRain(screenWidth: geometry.size.width)
+                SoundManager.shared.playSound(named: "coin_sound", loop: true)
+            }
+            .onDisappear {
+                stopCoinRain()
+                SoundManager.shared.stopSound()
             }
         }
-        .onAppear {
-            startCoinRain()
-//            playCoinSound()
-            SoundManager.shared.playSound(named: "coin_sound", loop: true)
-        }
-        .onDisappear {
-            stopCoinRain()
-            SoundManager.shared.stopSound()
-        }
     }
-
-    func startCoinRain() {
+    
+    // MARK: - Coin Rain
+    func startCoinRain(screenWidth: CGFloat) {
         timer = Timer.scheduledTimer(withTimeInterval: 0.04, repeats: true) { _ in
             let newCoin = Coin(
                 id: UUID(),
@@ -699,25 +693,24 @@ struct FallingCoinsView: View {
             coins.append(newCoin)
         }
     }
-
-    func animateCoinDrop(_ coin: Coin) {
+    
+    func animateCoinDrop(_ coin: Coin, screenHeight: CGFloat) {
         if let index = coins.firstIndex(where: { $0.id == coin.id }) {
             withAnimation(.linear(duration: coin.duration)) {
                 coins[index].y = screenHeight + 50
             }
 
-            // Usunięcie monety po animacji
+            // Remove coin after animation
             DispatchQueue.main.asyncAfter(deadline: .now() + coin.duration) {
                 coins.removeAll { $0.id == coin.id }
             }
         }
     }
-
+    
     func stopCoinRain() {
         timer?.invalidate()
         timer = nil
     }
-
 }
 
 struct Coin: Identifiable {

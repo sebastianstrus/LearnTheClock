@@ -155,22 +155,29 @@ struct SettingsView: View {
             Text("This action cannot be undone.".localized)
         }
         .sheet(isPresented: $showMailComposer) {
-            if MFMailComposeViewController.canSendMail() {
-                MailComposer(
-                    isPresented: $showMailComposer,
-                    screenshot: nil,
-                    recipient: "feedback.nobelmath@gmail.com",
-                    subject: "Nobel Math Feedback"
-                )
-            } else {
-                Text("Please configure Mail to send feedback.".localized)
+            GeometryReader { geo in
+                if MFMailComposeViewController.canSendMail() {
+                    MailComposer(
+                        isPresented: $showMailComposer,
+                        screenshot: nil,
+                        recipient: "feedback.nobelmath@gmail.com",
+                        subject: "Nobel Math Feedback",
+                        screenSize: geo.size
+                    )
+                } else {
+                    Text("Please configure Mail to send feedback.".localized)
+                }
             }
         }
         .background( GradientBackground().ignoresSafeArea().opacity(settings.isDarkMode ? 1.0 : 0.0))
         .scrollContentBackground(settings.isDarkMode ? .hidden : .visible)
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
-                Button(action: shareApp) {
+                ShareLink(
+                    item: URL(string: "https://apps.apple.com/app/6745169341")!,
+                    subject: Text("Nobel Math"),
+                    message: Text("Check out Nobel Math - a great math learning app!".localized)
+                ) {
                     Image(systemName: "square.and.arrow.up")
                         .accessibilityLabel("Share".localized)
                 }
@@ -179,28 +186,28 @@ struct SettingsView: View {
         }
     }
     
-    private func shareApp() {
-        let text = "Check out Nobel Math - a great math learning app!".localized
-        let url = URL(string: "https://apps.apple.com/app/6745169341")!
-        
-        let activityViewController = UIActivityViewController(activityItems: [text, url], applicationActivities: nil)
-        
-        // Safely get windowScene and rootViewController
-        guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-              let window = windowScene.windows.first,
-              let rootViewController = window.rootViewController else {
-            return
-        }
-
-        // Configure for iPad
-        if UIDevice.current.userInterfaceIdiom == .pad {
-            activityViewController.popoverPresentationController?.sourceView = rootViewController.view
-            activityViewController.popoverPresentationController?.sourceRect = CGRect(x: window.bounds.width / 2, y: window.bounds.height / 2, width: 0, height: 0)
-            activityViewController.popoverPresentationController?.permittedArrowDirections = []
-        }
-        
-        rootViewController.present(activityViewController, animated: true, completion: nil)
-    }
+//    private func shareApp() {
+//        let text = "Check out Nobel Math - a great math learning app!".localized
+//        let url = URL(string: "https://apps.apple.com/app/6745169341")!
+//        
+//        let activityViewController = UIActivityViewController(activityItems: [text, url], applicationActivities: nil)
+//        
+//        // Safely get windowScene and rootViewController
+//        guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+//              let window = windowScene.windows.first,
+//              let rootViewController = window.rootViewController else {
+//            return
+//        }
+//
+//        // Configure for iPad
+//        if UIDevice.current.userInterfaceIdiom == .pad {
+//            activityViewController.popoverPresentationController?.sourceView = rootViewController.view
+//            activityViewController.popoverPresentationController?.sourceRect = CGRect(x: window.bounds.width / 2, y: window.bounds.height / 2, width: 0, height: 0)
+//            activityViewController.popoverPresentationController?.permittedArrowDirections = []
+//        }
+//        
+//        rootViewController.present(activityViewController, animated: true, completion: nil)
+//    }
 
 }
 
