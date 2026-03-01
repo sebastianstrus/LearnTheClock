@@ -197,30 +197,122 @@ struct ProgressHeaderView: View {
     var progress: CGFloat { CGFloat(current) / CGFloat(total) }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack {
-                Text("Task \(current) of \(total)")
-                    .font(DS.display(14))
-                    .foregroundColor(DS.textSecondary)
+        VStack(spacing: 12) {
+
+            // ── Top row: step pills + percentage ──────────────────────────
+            HStack(alignment: .center, spacing: 10) {
+
+                // Step indicator pill
+                HStack(spacing: 6) {
+                    ZStack {
+                        Circle()
+                            .fill(DS.accent)
+                            .frame(width: 24, height: 24)
+                        Text("\(current)")
+                            .font(.system(size: 12, weight: .bold, design: .rounded))
+                            .foregroundColor(.white)
+                    }
+                    Text("of \(total)")
+                        .font(DS.display(14))
+                        .foregroundColor(DS.textSecondary)
+                }
+                .padding(.horizontal, 12)
+                .padding(.vertical, 6)
+                .background(
+                    Capsule()
+                        .fill(DS.accentSoft)
+                        .overlay(
+                            Capsule()
+                                .strokeBorder(DS.accent.opacity(0.2), lineWidth: 1)
+                        )
+                )
+
                 Spacer()
-                Text("\(Int(progress * 100))%")
-                    .font(DS.mono(13))
-                    .foregroundColor(DS.accent)
+
+                // Percentage badge
+                HStack(spacing: 3) {
+                    Text("\(Int(progress * 100))")
+                        .font(.system(size: 16, weight: .bold, design: .monospaced))
+                        .foregroundColor(DS.accent)
+                    Text("%")
+                        .font(.system(size: 11, weight: .semibold, design: .rounded))
+                        .foregroundColor(DS.accent.opacity(0.7))
+                        .offset(y: 1)
+                }
+                .padding(.horizontal, 10)
+                .padding(.vertical, 5)
+                .background(
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(DS.accentSoft)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 8)
+                                .strokeBorder(DS.accent.opacity(0.2), lineWidth: 1)
+                        )
+                )
             }
 
+            // ── Progress bar ───────────────────────────────────────────────
             GeometryReader { geo in
                 ZStack(alignment: .leading) {
-                    RoundedRectangle(cornerRadius: 3)
+
+                    // Track
+                    RoundedRectangle(cornerRadius: 6)
                         .fill(DS.border)
-                        .frame(height: 5)
-                    RoundedRectangle(cornerRadius: 3)
-                        .fill(DS.accent)
-                        .frame(width: geo.size.width * progress, height: 5)
+                        .frame(height: 10)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 6)
+                                .strokeBorder(Color.black.opacity(0.04), lineWidth: 1)
+                        )
+
+                    // Fill
+                    RoundedRectangle(cornerRadius: 6)
+                        .fill(
+                            LinearGradient(
+                                colors: [DS.accent, DS.accent.opacity(0.75)],
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
+                        )
+                        .frame(width: max(10, geo.size.width * progress), height: 10)
+                        // Gloss sheen
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 6)
+                                .fill(
+                                    LinearGradient(
+                                        colors: [
+                                            Color.white.opacity(0.35),
+                                            Color.white.opacity(0.0)
+                                        ],
+                                        startPoint: .top,
+                                        endPoint: .bottom
+                                    )
+                                )
+                        )
+                        .shadow(color: DS.accent.opacity(0.45), radius: 5, x: 0, y: 2)
                         .animation(.spring(response: 0.5, dampingFraction: 0.7), value: progress)
+
+                    // Leading glow dot
+                    if progress > 0.02 {
+                        Circle()
+                            .fill(Color.white.opacity(0.9))
+                            .frame(width: 5, height: 5)
+                            .shadow(color: DS.accent, radius: 4)
+                            .offset(x: max(5, geo.size.width * progress - 8),
+                                    y: 0)
+                            .animation(.spring(response: 0.5, dampingFraction: 0.7), value: progress)
+                    }
                 }
             }
-            .frame(height: 5)
+            .frame(height: 10)
         }
+        .padding(.horizontal, 20)
+        .padding(.vertical, 14)
+        .background(
+            RoundedRectangle(cornerRadius: DS.radiusCard)
+                .fill(DS.surface)
+                .shadow(color: Color(hex: "#1A1A2E").opacity(0.07), radius: 12, x: 0, y: 4)
+                .shadow(color: Color.black.opacity(0.04), radius: 2, x: 0, y: 1)
+        )
     }
 }
 
