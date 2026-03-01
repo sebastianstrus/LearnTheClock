@@ -138,7 +138,7 @@ class SettingsManager: ObservableObject {
     
     @AppStorage(UserDefaultsKeys.is24HourClock.rawValue) var is24HourClock: Bool = true
     
-    @AppStorage(UserDefaultsKeys.exampleCount.rawValue) var exampleCount: Int = 30
+    @AppStorage(UserDefaultsKeys.exampleCount.rawValue) var exampleCount: Int = 45
     @AppStorage(UserDefaultsKeys.difficultyLevel.rawValue) var difficultyLevel: Int = DifficultyLevel.medium.rawValue
     
     @Published var primaryLanguage: Language
@@ -198,7 +198,7 @@ class SettingsManager: ObservableObject {
 
     
     func resetSettings() {
-        exampleCount = 30
+        exampleCount = 45
         isDarkMode = false
         isTimerOn = true
         difficultyLevel = DifficultyLevel.medium.rawValue

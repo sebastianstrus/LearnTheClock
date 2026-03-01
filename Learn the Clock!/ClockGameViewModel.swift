@@ -34,15 +34,25 @@ final class ClockGameViewModel: ObservableObject {
     
     func generateTasks() {
         let count = settings.exampleCount
-        
+        let difficulty = DifficultyLevel(rawValue: settings.difficultyLevel) ?? .medium
+
         tasks = (0..<count).map { _ in
             let hour = settings.is24HourClock ? Int.random(in: 0...23) : Int.random(in: 1...12)
-            let minute = Int.random(in: 0...11) * 5
-            
+
+            let minute: Int
+            switch difficulty {
+            case .easy:
+                minute = [0, 15, 30, 45].randomElement()!
+            case .medium:
+                minute = Int.random(in: 0...11) * 5
+            case .hard:
+                minute = Int.random(in: 0...59)
+            }
+
             var components = DateComponents()
             components.hour = hour
             components.minute = minute
-            
+
             return ClockTask(date: Calendar.current.date(from: components)!)
         }
     }

@@ -55,25 +55,31 @@ struct SettingsView: View {
 
                 
                 Section(header: learningSectionHeader) {
-                    VStack(alignment: .leading, spacing: 6) {
-                        Text("Difficulty (Precision)".localized)
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
-                        Picker("Difficulty Level".localized, selection: $settings.difficultyLevel) {
-                            ForEach(DifficultyLevel.allCases, id: \.self) { level in
-                                Text(level.localizedName).tag(level.rawValue)
-                            }
+//                    VStack(alignment: .leading, spacing: 6) {
+//                        Text("Difficulty".localized)
+//                            .font(.subheadline)
+//                            .foregroundColor(.secondary)
+//                        Picker("Difficulty Level".localized, selection: $settings.difficultyLevel) {
+//                            ForEach(DifficultyLevel.allCases, id: \.self) { level in
+//                                Text(level.localizedName).tag(level.rawValue)
+//                            }
+//                        }
+//                        .pickerStyle(.segmented)
+//                        
+//                    }
+                    Picker("Difficulty Level".localized, selection: $settings.difficultyLevel) {
+                        ForEach(DifficultyLevel.allCases, id: \.self) { level in
+                            Text(level.localizedName).tag(level.rawValue)
                         }
-                        .pickerStyle(.segmented)
-                        
                     }
+                    .pickerStyle(.segmented)
                     
                     HStack(alignment: .center) {
                         Text("Example Count".localized)
                             .padding(.trailing, 10)
                         
                         let step: Double = 15
-                        let range = 15.0...90.0
+                        let range = 30.0...90.0
                         Slider(
                             value: Binding<Double>(
                                 get: { Double(settings.exampleCount) },
@@ -87,7 +93,7 @@ struct SettingsView: View {
                             in: range,
                             step: step
                         )
-                        .tint(.purple)
+                        //.tint(.purple)
                         
                         Text("\(settings.exampleCount)")
                             .monospacedDigit()
@@ -96,24 +102,24 @@ struct SettingsView: View {
                     
                     
                     Toggle("Display Timer".localized, isOn: settings.$isTimerOn)
-                        .tint(.purple)
+                        .tint(Color(uiColor: .systemBlue))
                     
                     Toggle("24h format".localized, isOn: settings.$is24HourClock)
-                        .tint(.purple)
+                        .tint(Color(uiColor: .systemBlue))
                     
 
                 }
                 
-                Section(header: Text("Appearance".localized)) {
-                    Picker("Theme".localized, selection: Binding(
-                        get: { settings.isDarkMode ? 1 : 0 },
-                        set: { settings.isDarkMode = $0 == 1 }
-                    )) {
-                        Text("Light".localized).tag(0)
-                        Text("Dark".localized).tag(1)
-                    }
-                    .pickerStyle(.segmented)
-                }
+//                Section(header: Text("Appearance".localized)) {
+//                    Picker("Theme".localized, selection: Binding(
+//                        get: { settings.isDarkMode ? 1 : 0 },
+//                        set: { settings.isDarkMode = $0 == 1 }
+//                    )) {
+//                        Text("Light".localized).tag(0)
+//                        Text("Dark".localized).tag(1)
+//                    }
+//                    .pickerStyle(.segmented)
+//                }
                 
                 Section(header: Text("Language".localized)) {
                     NavigationLink(destination: EmptyView()) {
@@ -181,7 +187,7 @@ struct SettingsView: View {
                     Image(systemName: "square.and.arrow.up")
                         .accessibilityLabel("Share".localized)
                 }
-                .tint(.purple)
+                //.tint(.purple)
             }
         }
     }

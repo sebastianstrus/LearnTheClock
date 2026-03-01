@@ -344,6 +344,10 @@ struct ClockTaskView: View {
     @State private var isCorrect = false
     @State private var audioPlayer: AVAudioPlayer?
 
+    private var difficulty: DifficultyLevel {
+        DifficultyLevel(rawValue: viewModel.settings.difficultyLevel) ?? .medium
+    }
+
     var body: some View {
         VStack(spacing: 20) {
 
@@ -412,6 +416,7 @@ struct ClockTaskView: View {
                 minuteAngle: $minuteAngle,
                 isCorrect: isCorrect,
                 isLocked: isCorrect,
+                showHourNumbers: difficulty != .hard,
                 onDragEnded: { check() }
             )
             .frame(maxWidth: .infinity)
@@ -497,6 +502,7 @@ struct AnalogClockView: View {
     @Binding var minuteAngle: Double
     var isCorrect: Bool
     var isLocked: Bool
+    var showHourNumbers: Bool = true
     var onDragEnded: (() -> Void)?
 
     @State private var draggingHand: DraggingHand?
@@ -599,16 +605,18 @@ struct AnalogClockView: View {
                 }
 
                 // ── Layer 6: Hour numerals ─────────────────────────────────
-                ForEach(1...12, id: \.self) { n in
-                    let isQuarter = n % 3 == 0
-                    Text("\(n)")
-                        .font(.system(
-                            size: isQuarter ? size * 0.082 : size * 0.068,
-                            weight: isQuarter ? .bold : .semibold,
-                            design: .rounded
-                        ))
-                        .foregroundColor(isQuarter ? Color(hex: "#111827") : Color(hex: "#374151"))
-                        .position(numberPosition(for: Double(n) * 30, size: size))
+                if showHourNumbers {
+                    ForEach(1...12, id: \.self) { n in
+                        let isQuarter = n % 3 == 0
+                        Text("\(n)")
+                            .font(.system(
+                                size: isQuarter ? size * 0.082 : size * 0.068,
+                                weight: isQuarter ? .bold : .semibold,
+                                design: .rounded
+                            ))
+                            .foregroundColor(isQuarter ? Color(hex: "#111827") : Color(hex: "#374151"))
+                            .position(numberPosition(for: Double(n) * 30, size: size))
+                    }
                 }
 
                 // ── Layer 7: Subtle inner shadow ring on face ─────────────
