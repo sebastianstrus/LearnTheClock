@@ -695,15 +695,23 @@ struct TimePickerTaskView: View {
 
     private func initPickerValues() {
         // Start pickers at a random wrong time so there's no free answer
-        selectedHour = hourRange.filter { $0 != correctHour }.randomElement() ?? hourRange.first!
+        selectedHour = hourRange.filter { !acceptableHours.contains($0) }.randomElement() ?? hourRange.first!
         selectedMinute = minuteValues.filter { $0 != correctMinute }.randomElement() ?? minuteValues.first!
     }
 
-    private var correctHour: Int {
+    /// All hour values the user could reasonably select for the clock position shown.
+    /// In 24-hour mode, 04:40 and 16:40 look identical on the analog dial,
+    /// so both the AM and PM equivalent are accepted.
+    private var acceptableHours: Set<Int> {
         let h = Calendar.current.dateComponents([.hour], from: task.date).hour!
-        if viewModel.settings.is24HourClock { return h }
+        if viewModel.settings.is24HourClock {
+            // Both the original hour and its 12-hour mirror are valid
+            let mirror = (h + 12) % 24
+            return Set([h, mirror].filter { hourRange.contains($0) })
+        }
+        // 12-hour mode: single correct answer
         let h12 = h % 12
-        return h12 == 0 ? 12 : h12
+        return [h12 == 0 ? 12 : h12]
     }
 
     private var correctMinute: Int {
@@ -723,7 +731,7 @@ struct TimePickerTaskView: View {
             minuteOk = selectedMinute == correctMinute
         }
 
-        let hourOk = selectedHour == correctHour
+        let hourOk = acceptableHours.contains(selectedHour)
 
         if hourOk && minuteOk {
             isCorrect = true
