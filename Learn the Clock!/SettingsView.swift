@@ -18,6 +18,7 @@ struct SettingsView: View {
     @State private var showCacheAlert = false
     @State private var showMailComposer = false
     @State private var showingLanguageHelp = false
+    @State private var showOnboarding: Bool = false
         
     var statisticsSectionHeader: some View {
         HStack(spacing: 6) {
@@ -51,6 +52,15 @@ struct SettingsView: View {
                             Text("View Statistics".localized)
                         }
                     }
+                
+                Section(header: Text("Intro Screens".localized)) {
+                    NavigationLink(destination: LandingView(showOnboarding: $showOnboarding)) {
+                        HStack {
+                            Text("About".localized)
+                            Spacer()
+                        }
+                    }
+                }
                 
 
                 

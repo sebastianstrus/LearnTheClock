@@ -10,7 +10,7 @@ import SwiftUI
 @main
 struct Learn_The_Clock_Appp: App {
     
-    @State private var showSplash = true
+    @AppStorage("shouldShowOnboarding") private var shouldShowOnboarding = true
     
     @StateObject private var settings = SettingsManager.shared
     @StateObject private var videoViewModel = VideoPlayerViewModel.shared
@@ -24,12 +24,14 @@ struct Learn_The_Clock_Appp: App {
                     .environmentObject(settings)
                     .environmentObject(videoViewModel)
                     .preferredColorScheme(settings.isDarkMode ? .dark : .light)
-
-            }
-            .animation(.easeInOut(duration: 1.0), value: showSplash)
-            .task {
-                try? await Task.sleep(nanoseconds: 500_000_000)
-                showSplash = false
+                    .transition(.opacity)
+                
+                if shouldShowOnboarding {
+                    LandingView(showOnboarding: $shouldShowOnboarding)
+                        .transition(.opacity)
+                        .zIndex(1)
+                }
+                
             }
 
         }
