@@ -93,6 +93,14 @@
 				Base,
 				sv,
 				de,
+				uk,
+				pl,
+				es,
+				it,
+				nb,
+				"pt-BR",
+				fr,
+				ja,
 			);
 			mainGroup = 7D22E4892F47C14A005209EA;
 			minimizedProjectReferenceProxies = 1;
