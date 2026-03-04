@@ -65,18 +65,6 @@ struct SettingsView: View {
 
                 
                 Section(header: learningSectionHeader) {
-//                    VStack(alignment: .leading, spacing: 6) {
-//                        Text("Difficulty".localized)
-//                            .font(.subheadline)
-//                            .foregroundColor(.secondary)
-//                        Picker("Difficulty Level".localized, selection: $settings.difficultyLevel) {
-//                            ForEach(DifficultyLevel.allCases, id: \.self) { level in
-//                                Text(level.localizedName).tag(level.rawValue)
-//                            }
-//                        }
-//                        .pickerStyle(.segmented)
-//                        
-//                    }
                     Picker("Difficulty Level".localized, selection: $settings.difficultyLevel) {
                         ForEach(DifficultyLevel.allCases, id: \.self) { level in
                             Text(level.localizedName).tag(level.rawValue)
@@ -94,7 +82,6 @@ struct SettingsView: View {
                             value: Binding<Double>(
                                 get: { Double(settings.exampleCount) },
                                 set: { newValue in
-                                    // Snap to nearest step and clamp to range
                                     let snapped = (newValue / step).rounded() * step
                                     let clamped = min(max(snapped, range.lowerBound), range.upperBound)
                                     settings.exampleCount = Int(clamped)
@@ -103,7 +90,6 @@ struct SettingsView: View {
                             in: range,
                             step: step
                         )
-                        //.tint(.purple)
                         
                         Text("\(settings.exampleCount)")
                             .monospacedDigit()
@@ -120,16 +106,16 @@ struct SettingsView: View {
 
                 }
                 
-//                Section(header: Text("Appearance".localized)) {
-//                    Picker("Theme".localized, selection: Binding(
-//                        get: { settings.isDarkMode ? 1 : 0 },
-//                        set: { settings.isDarkMode = $0 == 1 }
-//                    )) {
-//                        Text("Light".localized).tag(0)
-//                        Text("Dark".localized).tag(1)
-//                    }
-//                    .pickerStyle(.segmented)
-//                }
+                Section(header: Text("Appearance".localized)) {
+                    Picker("Theme".localized, selection: Binding(
+                        get: { settings.isDarkMode ? 1 : 0 },
+                        set: { settings.isDarkMode = $0 == 1 }
+                    )) {
+                        Text("Light".localized).tag(0)
+                        Text("Dark".localized).tag(1)
+                    }
+                    .pickerStyle(.segmented)
+                }
                 
                 Section(header: Text("Language".localized)) {
                     NavigationLink(destination: EmptyView()) {
@@ -138,7 +124,7 @@ struct SettingsView: View {
                             Spacer()
                             Text(settings.primaryLanguage.displayName)
                         }
-                        .contentShape(Rectangle()) // makes entire row tappable
+                        .contentShape(Rectangle())
                         .onTapGesture {
                             settings.openAppLanguageSettings()
                         }
@@ -176,8 +162,8 @@ struct SettingsView: View {
                     MailComposer(
                         isPresented: $showMailComposer,
                         screenshot: nil,
-                        recipient: "feedback.nobelmath@gmail.com",
-                        subject: "Nobel Math Feedback",
+                        recipient: "nordic.apps.feedback@gmail.com",
+                        subject: "Learn The Clock! Feedback",
                         screenSize: geo.size
                     )
                 } else {
@@ -197,34 +183,9 @@ struct SettingsView: View {
                     Image(systemName: "square.and.arrow.up")
                         .accessibilityLabel("Share".localized)
                 }
-                //.tint(.purple)
             }
         }
     }
-    
-//    private func shareApp() {
-//        let text = "Check out Nobel Math - a great math learning app!".localized
-//        let url = URL(string: "https://apps.apple.com/app/6760045366")!
-//
-//        let activityViewController = UIActivityViewController(activityItems: [text, url], applicationActivities: nil)
-//        
-//        // Safely get windowScene and rootViewController
-//        guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-//              let window = windowScene.windows.first,
-//              let rootViewController = window.rootViewController else {
-//            return
-//        }
-//
-//        // Configure for iPad
-//        if UIDevice.current.userInterfaceIdiom == .pad {
-//            activityViewController.popoverPresentationController?.sourceView = rootViewController.view
-//            activityViewController.popoverPresentationController?.sourceRect = CGRect(x: window.bounds.width / 2, y: window.bounds.height / 2, width: 0, height: 0)
-//            activityViewController.popoverPresentationController?.permittedArrowDirections = []
-//        }
-//        
-//        rootViewController.present(activityViewController, animated: true, completion: nil)
-//    }
-
 }
 
 
@@ -281,31 +242,26 @@ struct StatisticsView: View {
     
     private func columnHeaders() -> some View {
         HStack(spacing: 4) {
-            // Name header
             Text("Name".localized)
                 .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
                 .font(Font.system(size: 13).bold())
                 .foregroundColor(.primary)
             
-            // Count header
             Text("Count".localized)
                 .frame(minWidth: 0, maxWidth: .infinity, alignment: .center)
                 .font(Font.system(size: 13).bold())
                 .foregroundColor(.primary)
             
-            // Format header
             Text("Format".localized)
                 .frame(minWidth: 0, maxWidth: .infinity, alignment: .center)
                 .font(Font.system(size: 13).bold())
                 .foregroundColor(.primary)
             
-            // Result header
             Text("Result".localized)
                 .frame(minWidth: 0, maxWidth: .infinity, alignment: .center)
                 .font(Font.system(size: 13).bold())
                 .foregroundColor(.primary)
             
-            // Date header
             Text("Date".localized)
                 .frame(minWidth: 0, maxWidth: .infinity, alignment: .center)
                 .font(Font.system(size: 13).bold())
@@ -341,27 +297,22 @@ struct StatisticsView: View {
             } else {
                 ForEach(results) { result in
                     HStack(spacing: 4) {
-                        // Name column
                         Text(result.name)
                             .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
                             .font(.subheadline)
                         
-                        // Example count column
                         Text("\(result.exampleCount)")
                             .frame(minWidth: 0, maxWidth: .infinity, alignment: .center)
                             .font(.system(size: 13, design: .monospaced))
                         
-                        // Format column
                         Text(result.is24HourClock ? "24h" : "12h")
                             .frame(minWidth: 0, maxWidth: .infinity, alignment: .center)
                             .font(.system(size: 13, design: .monospaced))
                         
-                        // Time column
                         Text(result.time.formattedTime)
                             .frame(minWidth: 0, maxWidth: .infinity, alignment: .center)
                             .font(.system(size: 15, design: .monospaced))
                         
-                        // Date column
                         Text(formatDate(result.date))
                             .frame(minWidth: 0, maxWidth: .infinity, alignment: .center)
                             .foregroundColor(.secondary)

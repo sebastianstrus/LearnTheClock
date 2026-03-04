@@ -69,7 +69,7 @@ struct MailComposer: UIViewControllerRepresentable {
     
     private func getEmailBody() -> String {
         return """
-        I would like to share my feedback on the Nobel Math app:
+        I would like to share my feedback on the Learn The Clock! app:
         
         ------------------
         Device: \(UIDevice.current.modelName)
