@@ -190,9 +190,9 @@ struct SettingsView: View {
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 ShareLink(
-                    item: URL(string: "https://apps.apple.com/app/6745169341")!,
-                    subject: Text("Nobel Math"),
-                    message: Text("Check out Nobel Math - a great math learning app!".localized)
+                    item: URL(string: "https://apps.apple.com/app/6760045366")!,
+                    subject: Text("Learn The Clock!".localized),
+                    message: Text("Check out Learn The Clock! - a great clock learning app!".localized)
                 ) {
                     Image(systemName: "square.and.arrow.up")
                         .accessibilityLabel("Share".localized)
@@ -204,8 +204,8 @@ struct SettingsView: View {
     
 //    private func shareApp() {
 //        let text = "Check out Nobel Math - a great math learning app!".localized
-//        let url = URL(string: "https://apps.apple.com/app/6745169341")!
-//        
+//        let url = URL(string: "https://apps.apple.com/app/6760045366")!
+//
 //        let activityViewController = UIActivityViewController(activityItems: [text, url], applicationActivities: nil)
 //        
 //        // Safely get windowScene and rootViewController
