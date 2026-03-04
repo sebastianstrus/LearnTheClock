@@ -794,7 +794,7 @@ struct StaticClockView: View {
                     let isHour    = tick % 5  == 0
                     let isQuarter = tick % 15 == 0
                     let tickW: CGFloat = isQuarter ? 3.5 : isHour ? 2.5 : 1.2
-                    let tickH: CGFloat = isQuarter ? 20  : isHour ? 14  : 7
+                    let tickH: CGFloat = isQuarter ? 16  : isHour ? 14  : 7
                     let faceRadius     = center - size * 0.065
                     let tickCenterDist = faceRadius - tickH / 2
                     Rectangle()
@@ -998,7 +998,7 @@ struct AnalogClockView: View {
                     let isHour    = tick % 5  == 0
                     let isQuarter = tick % 15 == 0
                     let tickW: CGFloat = isQuarter ? 3.5 : isHour ? 2.5 : 1.2
-                    let tickH: CGFloat = isQuarter ? 20  : isHour ? 14  : 7
+                    let tickH: CGFloat = isQuarter ? 16  : isHour ? 14  : 7
                     let faceRadius     = center - size * 0.065
                     let tickCenterDist = faceRadius - tickH / 2
                     Rectangle()
