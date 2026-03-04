@@ -73,7 +73,7 @@ struct SettingsView: View {
                     .pickerStyle(.segmented)
                     
                     HStack(alignment: .center) {
-                        Text("Example Count".localized)
+                        Text("Task Count".localized)
                             .padding(.trailing, 10)
                         
                         let step: Double = 15

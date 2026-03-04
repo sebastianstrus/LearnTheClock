@@ -457,7 +457,7 @@ struct MultipleChoiceTaskView: View {
             if isCorrect {
                 HStack(spacing: 6) {
                     Image(systemName: "checkmark.circle.fill").foregroundColor(DS.success)
-                    Text("Correct!")
+                    Text("correct_exclamation")
                         .font(DS.display(16))
                         .foregroundColor(DS.success)
                 }
@@ -554,7 +554,7 @@ struct TimePickerTaskView: View {
                 if isCorrect {
                     HStack(spacing: 6) {
                         Image(systemName: "checkmark.circle.fill").foregroundColor(DS.success)
-                        Text("Correct!")
+                        Text("correct_exclamation")
                             .font(DS.display(16))
                             .foregroundColor(DS.success)
                     }
