@@ -565,6 +565,7 @@ struct TimePickerTaskView: View {
     @State private var isCorrect = false
     @State private var showError = false
     @State private var audioPlayer: AVAudioPlayer?
+    @State private var shakeTrigger: CGFloat = 0
 
     private var difficulty: DifficultyLevel {
         DifficultyLevel(rawValue: viewModel.settings.difficultyLevel) ?? .medium
@@ -621,13 +622,15 @@ struct TimePickerTaskView: View {
                                 )
                         }
                         .buttonStyle(.plain)
+                        .modifier(ShakeEffect(animatableData: shakeTrigger))
+                        .animation(.default, value: shakeTrigger)
 
-                        if showError {
-                            Text("Not quite — try again!")
-                                .font(ds.body(14))
-                                .foregroundColor(ds.error)
-                                .transition(.scale(scale: 0.9).combined(with: .opacity))
-                        }
+//                        if showError {
+//                            Text("Not quite — try again!")
+//                                .font(ds.body(14))
+//                                .foregroundColor(ds.error)
+//                                .transition(.scale(scale: 0.9).combined(with: .opacity))
+//                        }
                     }
                     .transition(.opacity)
                 }
@@ -770,7 +773,13 @@ struct TimePickerTaskView: View {
             onTaskSolved()
         } else {
             showError = true
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { showError = false }
+            
+            // HAPTIC
+            let generator = UINotificationFeedbackGenerator()
+            generator.notificationOccurred(.error)
+            
+            // SHAKE
+            shakeTrigger += 1
         }
     }
 
