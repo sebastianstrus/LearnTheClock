@@ -90,6 +90,8 @@ extension Color {
 // MARK: - Clock Grid View
 struct ClockGridView: View {
 
+    @Environment(\.dismiss) var dismiss
+    
     @StateObject private var viewModel: ClockGameViewModel
     @State private var showCoins = false
     @State private var shouldShowNameAlert = false
@@ -217,7 +219,21 @@ struct ClockGridView: View {
                 shouldShowNameAlert = true
             }
         }
+        .navigationBarBackButtonHidden(true)
         .toolbar {
+            ToolbarItem(placement: .navigationBarLeading) {
+                Button {
+                    dismiss()
+                } label: {
+                    HStack {
+                        Image(systemName: "chevron.left")
+                            .flipsForRightToLeftLayoutDirection(true)
+                        Text("Back".localized)
+                    }
+                    .foregroundColor(.blue)
+                }
+            }
+            
             if viewModel.settings.isTimerOn {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Text(elapsedTime.formattedTimeWithMilliseconds)
