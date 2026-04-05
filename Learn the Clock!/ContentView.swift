@@ -229,7 +229,7 @@ struct ClockGridView: View {
                         Image(systemName: "chevron.left")
                             .flipsForRightToLeftLayoutDirection(true)
                     }
-                    .foregroundColor(.blue)
+                    .foregroundColor(ds.accent)
                 }
             }
             
