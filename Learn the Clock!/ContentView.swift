@@ -228,7 +228,6 @@ struct ClockGridView: View {
                     HStack {
                         Image(systemName: "chevron.left")
                             .flipsForRightToLeftLayoutDirection(true)
-                        Text("Back".localized)
                     }
                     .foregroundColor(.blue)
                 }
